@@ -611,16 +611,19 @@
 
             container.scrollTop += scrollSpeed * scrollDirection;
 
-            const bottomLimit = container.scrollHeight - container.clientHeight;
+            const bottomReached =
+                container.scrollTop + container.clientHeight >= container.scrollHeight;
+
+            const topReached =
+                container.scrollTop <= 0;
 
             // ===== SAMPAI BAWAH =====
-            if (container.scrollTop >= bottomLimit - 5 && scrollDirection === 1) {
+            if (bottomReached && scrollDirection === 1) {
 
                 scrollDirection = -1;
 
                 if (!isRefreshing) {
                     isRefreshing = true;
-                    console.log("BOTTOM REFRESH");
 
                     loadData().then(() => {
                         isRefreshing = false;
@@ -629,13 +632,12 @@
             }
 
             // ===== SAMPAI ATAS =====
-            if (container.scrollTop <= 5 && scrollDirection === -1) {
+            if (topReached && scrollDirection === -1) {
 
                 scrollDirection = 1;
 
                 if (!isRefreshing) {
                     isRefreshing = true;
-                    console.log("TOP REFRESH");
 
                     loadData().then(() => {
                         isRefreshing = false;
