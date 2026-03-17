@@ -10,6 +10,17 @@
     }
 
     $isAdmin = ($_SESSION['role'] === 'all');
+
+    require "api/config.php";
+    $nik = $_SESSION['nik'];
+
+    $stmt = $conn->prepare("SELECT nama FROM karyawan WHERE nik = ?");
+    $stmt->bind_param("s", $nik);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $dataUser = $result->fetch_assoc();
+
+    $nama = $dataUser['nama'] ?? 'Unknown';
     ?>
 
     <!DOCTYPE html>
@@ -229,7 +240,11 @@
         <div class="header">
 
             <div class="user-info">
-                <strong>NIK: <?= htmlspecialchars($_SESSION['nik']) ?></strong>
+                <strong><?= strtoupper(htmlspecialchars($nama)) ?></strong><br>
+                <span>
+                    NIK: <?= htmlspecialchars($_SESSION['nik']) ?> |
+                    <?= strtoupper($_SESSION['role']) ?>
+                </span>
             </div>
 
             <div style="display:flex; gap:10px; align-items:center;">
@@ -296,7 +311,6 @@
 
             /* CAMERA */
             function openCamera() {
-
                 cameraModal.classList.add("active");
 
                 if (!html5QrCode) {
@@ -330,6 +344,7 @@
                 }
             }
 
+            /* LOAD HISTORY VIA AJAX */
             function loadHistory() {
                 fetch("api/get_history.php")
                     .then(res => res.text())
@@ -337,10 +352,13 @@
                         document.getElementById("historyBox").innerHTML = html;
                     });
             }
+
+            // AUTO REFRESH HISTORY SETIAP 5 DETIK
+            setInterval(loadHistory, 3000);
             loadHistory();
 
+            /* SCAN INPUT */
             scanInput.addEventListener("keydown", function(e) {
-
                 if (e.key !== "Enter") return;
 
                 const val = scanInput.value.trim();
@@ -375,7 +393,6 @@
             });
 
             qtyInput.addEventListener("keydown", function(e) {
-
                 if (e.key !== "Enter") return;
 
                 const qtyVal = parseInt(qtyInput.value);
@@ -415,7 +432,6 @@
                             alert("Server Error. Cek console.");
                         }
                     });
-
             });
         </script>
 

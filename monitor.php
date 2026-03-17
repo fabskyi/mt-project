@@ -1,30 +1,14 @@
-<?php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: home.php");
-    exit;
-}
-
-if ($_SESSION['role'] != 'monitor' && $_SESSION['role'] != 'all') {
-    header("Location: home.php");
-    exit;
-}
-
-$isAdmin = ($_SESSION['role'] === 'all');
-$isMonitor = ($_SESSION['role'] === 'monitor');
-?>
-
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>Supermarket Machine Shop</title>
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
-            --bg: #f4f4f4;
+            --bg: #d1d5db;
             --card: #ffffff;
             --border: #e5e7eb;
             --text: #111;
@@ -40,6 +24,7 @@ $isMonitor = ($_SESSION['role'] === 'monitor');
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
+            zoom: 1.25;
         }
 
         .topbar {
@@ -192,26 +177,30 @@ $isMonitor = ($_SESSION['role'] === 'monitor');
             background: #dc2626;
             color: #fff;
         }
+
+        .title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .logo {
+            height: 30px;
+        }
     </style>
 </head>
 
 <body>
 
     <div class="topbar">
-        <div class="title">Supermarket Machine Shop</div>
+        <div class="title">
+            <img src="assets/yanmar.png" class="logo">
+            <span>Supermarket Machine Shop</span>
+        </div>
         <div style="display:flex; align-items:center; gap:15px;">
 
-            <?php if ($isAdmin): ?>
-                <a href="home_menu.php">
-                    <button class="nav-btn back-btn">Back</button>
-                </a>
-            <?php endif; ?>
-
-            <?php if ($isMonitor || $isAdmin): ?>
-                <a href="signout.php">
-                    <button class="nav-btn logout-btn">Logout</button>
-                </a>
-            <?php endif; ?>
             <!-- DROPDOWN -->
             <div class="dropdown">
                 <button class="dropdown-btn" id="dropdownBtn">Filter Model ▾</button>
@@ -503,22 +492,25 @@ $isMonitor = ($_SESSION['role'] === 'monitor');
                                     label: "Safety Stock",
                                     data: safety,
                                     borderColor: "#2c08f5",
-                                    borderWidth: 2,
-                                    borderDash: [6, 6],
+                                    borderWidth: 1.5,
+                                    borderDash: [20, 5],
                                     pointRadius: 0,
+                                    pointHoverRadius: 0,
+                                    pointStyle: 'circle',
                                     fill: false,
                                     tension: 0
                                 },
                                 {
                                     type: "line",
-                                    label: "Max Model",
+                                    label: "",
                                     data: Array(labels.length).fill(minStock),
                                     borderColor: "#000",
                                     borderWidth: 2,
-                                    borderDash: [6, 6],
+                                    borderDash: [20, 10],
                                     pointRadius: 0,
                                     fill: false,
-                                    tension: 0
+                                    tension: 0,
+                                    hidden: true
                                 }
                             ]
                         },
@@ -528,24 +520,43 @@ $isMonitor = ($_SESSION['role'] === 'monitor');
                             animation: false,
                             responsive: true,
                             maintainAspectRatio: false,
+                            layout: {
+                                padding: {
+                                    right: 50
+                                }
+                            },
                             plugins: {
                                 legend: {
                                     display: true,
                                     position: "bottom",
                                     labels: {
-                                        filter: function(item) {
-                                            return item.text !== "";
+                                        generateLabels(chart) {
+
+                                            const datasets = chart.data.datasets;
+
+                                            return datasets
+                                                .filter(ds => ds.label)
+                                                .map((ds, i) => ({
+                                                    text: "● - ● - ● - ● -  " + ds.label, // titik lebih besar
+                                                    fillStyle: 'transparent',
+                                                    strokeStyle: '#2c08f5',
+                                                    fontColor: '#2c08f5',
+                                                    lineWidth: 0,
+                                                    hidden: false,
+                                                    datasetIndex: i
+                                                }));
                                         },
                                         font: {
                                             size: 12,
-                                            weight: ""
+                                            weight: "bold"
                                         }
                                     }
                                 }
                             },
                             scales: {
                                 x: {
-                                    beginAtZero: true
+                                    beginAtZero: true,
+                                    grace: '15%'
                                 },
                                 y: {
                                     ticks: {
@@ -646,6 +657,7 @@ $isMonitor = ($_SESSION['role'] === 'monitor');
 
         startScroll();
 
+        /* TOGGLE BUTTON ONLY */
         toggleBtn.addEventListener("click", () => {
             autoScrollActive = !autoScrollActive;
 
@@ -660,19 +672,7 @@ $isMonitor = ($_SESSION['role'] === 'monitor');
             }
         });
 
-        container.addEventListener("mouseenter", () => {
-            autoScrollActive = false;
-            cancelAnimationFrame(animationId);
-            toggleBtn.innerText = "Play";
-            toggleBtn.style.background = "#16a34a";
-        });
 
-        container.addEventListener("mouseleave", () => {
-            autoScrollActive = true;
-            toggleBtn.innerText = "Pause";
-            toggleBtn.style.background = "#111";
-            animationId = requestAnimationFrame(autoScroll);
-        });
         const valueLabelPlugin = {
             id: 'valueLabel',
             afterDatasetsDraw(chart) {
@@ -698,7 +698,7 @@ $isMonitor = ($_SESSION['role'] === 'monitor');
 
                         ctx.fillText(
                             value,
-                            Math.min(bar.x + 6, chart.chartArea.right - 20),
+                            Math.min(bar.x + 10, chart.chartArea.right - 40),
                             bar.y
                         );
 
