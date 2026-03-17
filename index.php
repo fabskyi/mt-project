@@ -451,19 +451,19 @@
             }
 
             .logo-title {
-                font-size: 18px;
-                font-weight: 700;
+                font-size: 19px;
+                font-weight: bold;
                 letter-spacing: 1px;
                 color: white;
                 position: relative;
-                padding-left: 14px;
+                padding-left: 5px;
             }
 
             .logo-title::before {
                 content: "";
                 position: absolute;
                 left: 0;
-                top: 4px;
+                top: 5px;
                 width: 4px;
                 height: 18px;
                 background: #e11d48;
@@ -475,6 +475,7 @@
                 color: rgba(255, 255, 255, 0.6);
                 margin-top: 6px;
                 letter-spacing: .5px;
+                position: left;
             }
 
             /* ================= MODAL ================= */
@@ -813,6 +814,76 @@
                 transform: translateX(-20px);
                 transition: all 0.3s ease;
             }
+
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 35px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .logo-img {
+                height: 30px;
+                width: auto;
+            }
+
+            .toast-confirm {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.4);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            }
+
+            .toast-box {
+                background: white;
+                padding: 20px 25px;
+                border-radius: 12px;
+                width: 300px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                animation: scaleIn 0.2s ease;
+            }
+
+            .toast-actions {
+                margin-top: 15px;
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .btn-yes {
+                background: #dc2626;
+                color: white;
+                border: none;
+                padding: 6px 14px;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+
+            .btn-no {
+                background: #e5e7eb;
+                border: none;
+                padding: 6px 14px;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+
+            @keyframes scaleIn {
+                from {
+                    transform: scale(0.8);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
         </style>
     </head>
 
@@ -820,8 +891,11 @@
         <div class="layout">
             <aside class="sidebar">
                 <div class="logo">
-                    <div class="logo-title">PT. YADIN</div>
-                    <div class="logo-sub">Inventory Management System</div>
+                    <img src="assets/yanmar.png" class="logo-img">
+                    <div>
+                        <div class="logo-title">PT. YADIN</div>
+                        <div class="logo-sub">Inventory Management System</div>
+                    </div>
                 </div>
                 <ul>
                     <?php if ($role == "ms1"): ?>
@@ -1020,6 +1094,16 @@
 
             </div>
 
+        </div>
+
+        <div id="toastConfirm" class="toast-confirm">
+            <div class="toast-box">
+                <p id="toastMessage">Yakin ingin menghapus?</p>
+                <div class="toast-actions">
+                    <button onclick="confirmDelete()" class="btn-yes">Yes</button>
+                    <button onclick="closeToast()" class="btn-no">Cancel</button>
+                </div>
+            </div>
         </div>
         <script>
             let currentSort = "";
@@ -1474,15 +1558,35 @@
                 }
             }
 
+            let deleteData = {};
+
             function deleteItem(btn) {
 
-                const modelId = btn.dataset.model;
-                const itemId = btn.dataset.item;
-                const partName = btn.dataset.part;
+                deleteData = {
+                    modelId: btn.dataset.model,
+                    itemId: btn.dataset.item,
+                    partName: btn.dataset.part,
+                    element: btn
+                };
 
-                if (!confirm("Yakin ingin menghapus part: " + partName + " ?")) {
-                    return;
-                }
+                document.getElementById("toastMessage").innerText =
+                    "Hapus part: " + deleteData.partName + " ?";
+
+                document.getElementById("toastConfirm").style.display = "flex";
+            }
+
+
+            function closeToast() {
+                document.getElementById("toastConfirm").style.display = "none";
+            }
+
+            function confirmDelete() {
+
+                const {
+                    modelId,
+                    itemId,
+                    element
+                } = deleteData;
 
                 fetch("api/delete_item.php", {
                         method: "POST",
@@ -1499,22 +1603,19 @@
 
                         if (data.success) {
 
-                            const row = btn.closest("tr");
+                            const row = element.closest("tr");
                             row.classList.add("fade-out-row");
+
                             setTimeout(() => {
                                 row.remove();
                                 loadItems();
                             }, 300);
 
                         } else {
-                            alert(data.message || "Gagal menghapus item");
-                            console.log(data);
+                            alert("Gagal menghapus");
                         }
 
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        alert("Server error");
+                        closeToast();
                     });
             }
 
