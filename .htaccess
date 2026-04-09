@@ -1,0 +1,10 @@
+    RewriteEngine On
+
+    # Jika file.php-nya ada dan bukan folder
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}.php -f
+    RewriteRule ^(.*)$ $1.php [L]
+
+    # Redirect akses via .php ke URL tanpa .php (opsional)
+    RewriteCond %{THE_REQUEST} \s/([^.]+)\.php [NC]
+    RewriteRule ^(.*)\.php$ /%1 [R=301,L]
