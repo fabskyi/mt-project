@@ -52,17 +52,10 @@ echo "<tr style='font-weight:bold; background:#E0E0E0;'>";
 echo "<td>Model</td>";
 echo "<td>Part Number</td>";
 echo "<td>Part Name</td>";
-
-foreach ($dates as $date) {
-    $day = date("d", strtotime($date));
-    echo "<td>TGL $day IN</td>";
-    echo "<td>TGL $day OUT</td>";
-}
-
-echo "<td>Total IN</td>";
-echo "<td>Total OUT</td>";
+echo "<td>Tanggal</td>";
+echo "<td>Type</td>";
+echo "<td>Qty</td>";
 echo "</tr>";
-
 /* ===========================
    3️⃣ BUILD SELECT DINAMIS
 =========================== */
@@ -97,31 +90,14 @@ SELECT
     m.model_name,
     i.part_number,
     i.part_name,
-    agg.*,
-    agg.total_in,
-    agg.total_out
+    DATE(sl.created_at) as trx_date,
+    sl.type,
+    SUM(sl.qty) as qty
 
-FROM items i
+FROM stock_logs sl
 
-/* =========================
-   AGREGASI STOCK DULU
-========================= */
-LEFT JOIN (
-    SELECT 
-        sl.item_id,
-        $selectDynamic,
-        SUM(CASE WHEN sl.type='in' THEN sl.qty ELSE 0 END) AS total_in,
-        SUM(CASE WHEN sl.type='out' THEN sl.qty ELSE 0 END) AS total_out
-    FROM stock_logs sl
-    WHERE sl.created_at >= '$startMonth'
-      AND sl.created_at < '$endMonth'
-      AND sl.lokasi_id = $lokasi_id
-    GROUP BY sl.item_id
-) agg ON agg.item_id = i.id
+JOIN items i ON sl.item_id = i.id
 
-/* =========================
-   AMBIL SATU MODEL SAJA
-========================= */
 LEFT JOIN (
     SELECT 
         mi.item_id,
@@ -131,9 +107,21 @@ LEFT JOIN (
     GROUP BY mi.item_id
 ) m ON m.item_id = i.id
 
-WHERE i.location_id = $lokasi_id
+WHERE sl.created_at >= '$startMonth'
+  AND sl.created_at < '$endMonth'
+  AND sl.lokasi_id = $lokasi_id
 
-ORDER BY m.model_name ASC
+GROUP BY 
+    m.model_name,
+    i.part_number,
+    i.part_name,
+    DATE(sl.created_at),
+    sl.type
+
+ORDER BY 
+    m.model_name ASC,
+    i.part_name ASC,
+    trx_date ASC
 ";
 
 /* ===========================
@@ -152,21 +140,17 @@ if (!$result) {
 
 while ($row = $result->fetch_assoc()) {
 
-    echo "<tr>";
-    echo "<td>{$row['model_name']}</td>";
-    echo "<td>{$row['part_number']}</td>";
-    echo "<td>{$row['part_name']}</td>";
+    while ($row = $result->fetch_assoc()) {
 
-    foreach ($dates as $date) {
-        $aliasDate = str_replace('-', '', $date);
-
-        echo "<td>" . $row['in_' . $aliasDate] . "</td>";
-        echo "<td>" . $row['out_' . $aliasDate] . "</td>";
+        echo "<tr>";
+        echo "<td>{$row['model_name']}</td>";
+        echo "<td>{$row['part_number']}</td>";
+        echo "<td>{$row['part_name']}</td>";
+        echo "<td>{$row['trx_date']}</td>";
+        echo "<td>" . strtoupper($row['type']) . "</td>";
+        echo "<td>{$row['qty']}</td>";
+        echo "</tr>";
     }
-
-    echo "<td>{$row['total_in']}</td>";
-    echo "<td>{$row['total_out']}</td>";
-    echo "</tr>";
 }
 
 echo "</table>";

@@ -5,11 +5,19 @@
         exit;
     }
 
-    if ($_SESSION['role'] != 'operator' && $_SESSION['role'] != 'all') {
+    if ($_SESSION['role'] != 'operator' && $_SESSION['role'] != 'all' && $_SESSION['role'] != 'machining') {
         die("Akses ditolak");
     }
 
     $isAdmin = ($_SESSION['role'] === 'all');
+    $isMachining = ($_SESSION['role'] === 'machining');
+    $isOperator = ($_SESSION['role'] === 'operator');
+    
+    if ($isAdmin) {
+        $isMachining = true;
+        $isOperator = true;
+    }
+
 
     require "api/config.php";
     $nik = $_SESSION['nik'];
@@ -173,14 +181,16 @@
 
             .camera-box {
                 background: white;
-                padding: 25px;
+                padding: 15px;
                 border-radius: 12px;
                 width: 95%;
-                max-width: 420px;
+                max-width: 600px;
             }
 
             #reader {
                 width: 100%;
+                /* max-height: 200px;*/
+                overflow: hidden; 
             }
 
             .close-btn {
@@ -232,6 +242,30 @@
             .back-btn:hover {
                 background: #1e40af;
             }
+            .qty-presets {
+                display: flex;
+                gap: 8px;
+                margin-bottom: 15px;
+                flex-wrap: wrap;
+            }
+
+            .qty-preset-btn {
+                flex: 1;
+                padding: 10px;
+                font-weight: 600;
+                border-radius: 8px;
+                border: 1.5px solid black;
+                background: white;
+                cursor: pointer;
+                font-size: 14px;
+                transition: 0.2s;
+                min-width: 50px;
+            }
+
+            .qty-preset-btn:hover {
+                background: black;
+                color: white;
+            }
         </style>
     </head>
 
@@ -263,16 +297,26 @@
 
             <div class="card">
                 <div class="mode-container">
-                    <button class="mode-btn" onclick="setMode('in', this)">IN</button>
-                    <button class="mode-btn" onclick="setMode('out', this)">OUT</button>
-                    <button class="mode-btn" onclick="setMode('return', this)">RETURN</button>
+                    <?php if ($isMachining): ?>
+                        <button class="mode-btn" onclick="setMode('in', this)">IN</button>
+                    <?php endif; ?>
+                    <?php if ($isOperator): ?>
+                        <button class="mode-btn" onclick="setMode('out', this)">OUT</button>
+                        <button class="mode-btn" onclick="setMode('return', this)">RETURN</button>
+                    <?php endif; ?>
                 </div>
             </div>
 
-            <div class="card">
-                <button class="scan-btn" onclick="openCamera()">Scan Barcode</button>
-                <input type="text" id="scanInput" placeholder="Scan / Ketik Manual">
-                <input type="number" id="qtyInput" placeholder="Input Qty" style="display:none;">
+          <button class="scan-btn" onclick="openCamera()">Scan Barcode</button>
+            <input type="text" id="scanInput" placeholder="Scan / Ketik Manual">
+            <input type="number" id="qtyInput" placeholder="Input Qty" style="display:none;">
+            <div class="qty-presets" id="qtyPresets" style="display:none;">
+                <button class="qty-preset-btn" onclick="setQty(1)">1</button>
+                <button class="qty-preset-btn" onclick="setQty(5)">5</button>
+                <button class="qty-preset-btn" onclick="setQty(10)">10</button>
+                <button class="qty-preset-btn" onclick="setQty(15)">15</button>
+                <button class="qty-preset-btn" onclick="setQty(20)">20</button>
+                <button class="qty-preset-btn" onclick="setQty(25)">25</button>
             </div>
 
             <div class="card">
@@ -280,12 +324,57 @@
                 <div id="historyBox" class="history-box"></div>
             </div>
 
-        </div>
+           <?php if ($isMachining || $isAdmin): ?>
+                <div class="card">
+                    <h3 style="margin-bottom:20px;">📥 Download History Transaction</h3>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+
+                        <!-- Harian -->
+                        <div style="
+                            border: 1.5px solid #e5e7eb;
+                            border-radius: 10px;
+                            padding: 18px;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 10px;
+                        ">
+                            <div style="font-weight:600; font-size:13px; color:#666; text-transform:uppercase; letter-spacing:1px;">
+                                Harian
+                            </div>
+                            <input type="date" id="dlDate" style="margin-bottom:0;">
+                            <button class="scan-btn" style="margin-bottom:0;" onclick="downloadHistory()">
+                                📥 Download CSV
+                            </button>
+                        </div>
+
+                        <!-- Bulanan -->
+                        <div style="
+                            border: 1.5px solid #e5e7eb;
+                            border-radius: 10px;
+                            padding: 18px;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 10px;
+                        ">
+                            <div style="font-weight:600; font-size:13px; color:#666; text-transform:uppercase; letter-spacing:1px;">
+                                Bulanan
+                            </div>
+                            <input type="month" id="dlMonth" style="margin-bottom:0;">
+                            <button class="scan-btn" style="margin-bottom:0;" onclick="downloadHistoryMonthly()">
+                                📥 Download CSV
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+                <?php endif; ?>
+
 
         <div id="cameraModal" class="camera-modal">
             <div class="camera-box">
                 <div id="reader"></div>
-                <button class="close-btn" onclick="closeCamera()">Tutup Kamera</button>
+                <button class="close-btn" onclick="closeCamera()">Close Camera</button>
             </div>
         </div>
 
@@ -318,11 +407,11 @@
                 }
 
                 html5QrCode.start({
-                        facingMode: "environment"
-                    }, {
-                        fps: 10,
-                        qrbox: 250
-                    },
+                    facingMode: "environment"
+                }, {
+                    fps: 100,
+                    qrbox: { width: 350, height: 100 }
+                },
                     (decodedText) => {
                         scanInput.value = decodedText;
                         closeCamera();
@@ -386,8 +475,13 @@
                         }
 
                         selectedItem = res;
-                        alert("PART: " + res.part + "\nSTOCK: " + res.stock);
+                       alert(
+                            "MODEL : " + (res.models ?? '-') +
+                            "\nPART  : " + res.part +
+                            "\nSTOCK : " + res.stock
+                        );
                         qtyInput.style.display = "block";
+                        document.getElementById("qtyPresets").style.display = "flex"; // ← tambah ini
                         qtyInput.focus();
                     });
             });
@@ -422,6 +516,7 @@
                                 alert("Transaction Success");
                                 qtyInput.value = "";
                                 qtyInput.style.display = "none";
+                                document.getElementById("qtyPresets").style.display = "none";
                                 selectedItem = null;
                                 scanInput.value = "";
                                 loadHistory();
@@ -433,6 +528,32 @@
                         }
                     });
             });
+
+            // Set default tanggal hari ini
+                document.addEventListener("DOMContentLoaded", function () {
+                    const today = new Date().toISOString().split("T")[0];
+                    document.getElementById("dlDate").value = today;
+                    const now = new Date();
+                    document.getElementById("dlMonth").value =
+                        now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+                });
+
+                function downloadHistory() {
+                    const date = document.getElementById("dlDate").value;
+                    if (!date) { alert("Pilih tanggal dulu"); return; }
+                    window.open("api/export_transaction_daily.php?date=" + date, "_blank");
+                }
+
+                function downloadHistoryMonthly() {
+                    const month = document.getElementById("dlMonth").value;
+                    if (!month) { alert("Pilih bulan dulu"); return; }
+                    window.open("api/export_transaction_monthly.php?month=" + month, "_blank");
+                }
+
+                function setQty(val) {
+                    qtyInput.value = val;
+                    qtyInput.focus();
+                }
         </script>
 
     </body>

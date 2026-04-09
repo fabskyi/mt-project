@@ -22,16 +22,14 @@ if ($mode == '' || $scan_input == '' || $qty <= 0) {
     exit;
 }
 
-/* CARI ITEM */
 $stmt = $conn->prepare("
     SELECT id, part_name, current_stock
     FROM items
     WHERE part_number = ?
-    OR part_name = ?
     LIMIT 1
 ");
-
-$stmt->bind_param("ss", $scan_input, $scan_input);
+$stmt->bind_param("s", $scan_input);
+error_log("scan_input: " . $scan_input);
 $stmt->execute();
 $res = $stmt->get_result();
 
@@ -44,7 +42,6 @@ $item = $res->fetch_assoc();
 $item_id = $item['id'];
 $current_stock = intval($item['current_stock']);
 
-/* HITUNG STOCK */
 if ($mode == "IN" || $mode == "RETURN") {
     $new_stock = $current_stock + $qty;
 } else if ($mode == "OUT") {
@@ -60,7 +57,6 @@ if ($mode == "IN" || $mode == "RETURN") {
     exit;
 }
 
-/* UPDATE STOCK */
 $update = $conn->prepare("
     UPDATE items
     SET current_stock=?
@@ -69,7 +65,6 @@ $update = $conn->prepare("
 $update->bind_param("ii", $new_stock, $item_id);
 $update->execute();
 
-/* INSERT TRANSACTION + NIK */
 $cekNik = $conn->prepare("SELECT nik FROM karyawan WHERE nik = ?");
 $cekNik->bind_param("s", $nik_karyawan);
 $cekNik->execute();

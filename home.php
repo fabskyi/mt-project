@@ -47,7 +47,10 @@ if (isset($_POST['login'])) {
                 header("Location: home_menu.php");
             } elseif ($user['role'] == "operator") {
                 header("Location: transaction.php");
+            } elseif ($user['role'] == "machining") {
+                header("Location: transaction.php");
             }
+
 
             exit;
         } else {

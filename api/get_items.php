@@ -23,6 +23,7 @@ $stmt = $conn->prepare("
         i.part_number,
         i.current_stock,
         mi.safety_stock,
+          mi.production_status,
         i.updated_at
     FROM model_items mi
     JOIN models m ON mi.model_id = m.id
@@ -51,6 +52,11 @@ while ($row = $result->fetch_assoc()) {
     }
 
     $row['status'] = $status;
+    $data[] = $row;
+}
+
+while ($row = $result->fetch_assoc()) {
+    $row['production_status'] = intval($row['production_status']); 
     $data[] = $row;
 }
 

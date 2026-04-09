@@ -189,6 +189,21 @@
         .logo {
             height: 30px;
         }
+
+        .dropdown-search {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .dropdown-search:focus {
+            border-color: #3c8dbc;
+        }
     </style>
 </head>
 
@@ -206,6 +221,8 @@
                 <button class="dropdown-btn" id="dropdownBtn">Filter Model ▾</button>
                 <div class="dropdown-content" id="dropdownContent"></div>
             </div>
+
+            
             <button id="scrollToggle">Pause</button>
             <div class="clock" id="clock"></div>
         </div>
@@ -247,7 +264,7 @@
                 dropdownContent.style.display === "block" ? "none" : "block";
         });
 
-        document.addEventListener("click", function(e) {
+        document.addEventListener("click", function (e) {
             if (!e.target.closest(".dropdown")) {
                 dropdownContent.style.display = "none";
             }
@@ -310,7 +327,12 @@
             document.getElementById("lowCount").innerHTML = "LOW: " + low;
 
             // INIT DROPDOWN SEKALI
-            if (!dropdownInitialized) {
+           if (!dropdownInitialized) {
+                const searchWrapper = document.createElement("div");
+                searchWrapper.innerHTML = `<input type="text" id="modelSearch" class="dropdown-search" placeholder="Search model...">`;
+                dropdownContent.appendChild(searchWrapper);
+
+                // ✅ Hanya satu deklarasi selectAllLabel
                 const selectAllLabel = document.createElement("label");
                 selectAllLabel.innerHTML = `<input type="checkbox" id="selectAllModels"> Select All`;
                 dropdownContent.appendChild(selectAllLabel);
@@ -320,19 +342,21 @@
                 dropdownContent.appendChild(unselectAllLabel);
 
                 dropdownContent.appendChild(document.createElement("hr"));
+
                 Object.keys(grouped).forEach(modelName => {
 
                     if (selectedModels.size === 0 || selectedModels.has(modelName)) {
                         selectedModels.add(modelName);
                     }
 
-                    const label = document.createElement("label");
+                  const label = document.createElement("label");
+                    label.dataset.model = modelName; // ← tambah ini
                     label.innerHTML = `
-                                    <input type="checkbox" value="${modelName}" ${selectedModels.has(modelName) ? "checked" : ""}>
-                                    ${modelName}
-                                    `;
+                        <input type="checkbox" value="${modelName}" ${selectedModels.has(modelName) ? "checked" : ""}>
+                        ${modelName}
+                    `;
 
-                    label.querySelector("input").addEventListener("change", function() {
+                    label.querySelector("input").addEventListener("change", function () {
 
                         if (this.checked) {
                             selectedModels.add(modelName);
@@ -354,7 +378,7 @@
                     const selectAll = document.getElementById("selectAllModels");
                     const unselectAll = document.getElementById("unselectAllModels");
 
-                    selectAll.addEventListener("change", function() {
+                    selectAll.addEventListener("change", function () {
 
                         if (this.checked) {
 
@@ -376,7 +400,7 @@
 
                     });
 
-                    unselectAll.addEventListener("change", function() {
+                    unselectAll.addEventListener("change", function () {
 
                         if (this.checked) {
 
@@ -398,6 +422,19 @@
 
                     });
 
+                 const modelSearch = document.getElementById("modelSearch");
+                    modelSearch.addEventListener("input", function () {
+                        const keyword = this.value.toLowerCase();
+                        document.querySelectorAll('#dropdownContent label[data-model]').forEach(label => {
+                            const name = label.dataset.model.toLowerCase();
+                            label.style.display = name.includes(keyword) ? "block" : "none";
+                        });
+                    });
+
+                    modelSearch.addEventListener("click", function (e) {
+                        e.stopPropagation(); // cegah dropdown tertutup saat klik search
+                    });
+
                 }, 100);
             }
 
@@ -408,185 +445,168 @@
             document.getElementById("lowCount").innerHTML = "LOW: " + low;
         }
 
-        /* ===============================
-           UPDATE CHART TANPA DESTROY
-        ================================ */
+/* ===============================
+   UPDATE CHARTS - FIXED (minStock Error Solved)
+ ================================ */
 
-        function updateCharts(grouped) {
-            // CONTROL CHECKBOX
+function updateCharts(grouped) {
+    Object.keys(grouped).forEach(modelName => {
 
-            Object.keys(grouped).forEach(modelName => {
+        const chartId = "chart-" + modelName.replace(/\s+/g, '');
+        let modelData = grouped[modelName];
 
-                const chartId = "chart-" + modelName.replace(/\s+/g, '');
-                const modelData = grouped[modelName];
+        modelData.sort((a, b) => a.part_name.localeCompare(b.part_name));
 
-                modelData.sort((a, b) => a.part_name.localeCompare(b.part_name));
-
-                if (!modelPartOrder[modelName]) {
-                    modelPartOrder[modelName] = modelData.map(i => i.part_name);
-                }
-
-                const fixedOrder = modelPartOrder[modelName];
-
-                const labels = fixedOrder;
-                const stocks = [];
-                const safety = [];
-                const colors = [];
-
-                fixedOrder.forEach(partName => {
-
-                    const found = modelData.find(i => i.part_name === partName);
-
-                    if (found) {
-                        const stock = parseInt(found.current_stock);
-                        const safetyStock = Number(found.safety_stock) * 1.2;
-                        const stockValues = modelData.map(i => parseInt(i.current_stock));
-                        const minStockValue = Math.min(...stockValues);
-                        stocks.push(Number(stock));
-                        safety.push(Number(safetyStock));
-
-                        if (stock === minStockValue) {
-                            colors.push("#dc2626");
-                        } else if (stock < safetyStock) {
-                            colors.push("#facc15");
-                        } else {
-                            colors.push("#16a34a");
-                        }
-
-                    } else {
-                        stocks.push(0);
-                        safety.push(0);
-                        colors.push("#ccc");
-                    }
-                });
-
-
-                if (!charts[chartId]) {
-
-                    const box = document.createElement("div");
-                    box.className = "model-box";
-                    box.id = "box-" + chartId;
-
-                    box.innerHTML = `
-                                <div class="model-title">${modelName}</div>
-                                <div class="chart-wrapper"><canvas id="${chartId}"></canvas></div>`;
-                    container.appendChild(box);
-
-                    const ctx = document.getElementById(chartId).getContext("2d");
-                    const minStock = Math.min(...stocks);
-
-                    charts[chartId] = new Chart(ctx, {
-                        type: "bar",
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                    label: "",
-                                    data: stocks,
-                                    backgroundColor: colors,
-                                    barThickness: 12,
-                                    maxBarThickness: 30,
-                                    borderWidth: 0
-                                },
-                                {
-                                    type: "line",
-                                    label: "Safety Stock",
-                                    data: safety,
-                                    borderColor: "#2c08f5",
-                                    borderWidth: 1.5,
-                                    borderDash: [20, 5],
-                                    pointRadius: 0,
-                                    pointHoverRadius: 0,
-                                    pointStyle: 'circle',
-                                    fill: false,
-                                    tension: 0
-                                },
-                                {
-                                    type: "line",
-                                    label: "",
-                                    data: Array(labels.length).fill(minStock),
-                                    borderColor: "#000",
-                                    borderWidth: 2,
-                                    borderDash: [20, 10],
-                                    pointRadius: 0,
-                                    fill: false,
-                                    tension: 0,
-                                    hidden: true
-                                }
-                            ]
-                        },
-                        plugins: [valueLabelPlugin],
-                        options: {
-                            indexAxis: 'y',
-                            animation: false,
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            layout: {
-                                padding: {
-                                    right: 50
-                                }
-                            },
-                            plugins: {
-                                legend: {
-                                    display: true,
-                                    position: "bottom",
-                                    labels: {
-                                        generateLabels(chart) {
-
-                                            const datasets = chart.data.datasets;
-
-                                            return datasets
-                                                .filter(ds => ds.label)
-                                                .map((ds, i) => ({
-                                                    text: "● - ● - ● - ● -  " + ds.label, // titik lebih besar
-                                                    fillStyle: 'transparent',
-                                                    strokeStyle: '#2c08f5',
-                                                    fontColor: '#2c08f5',
-                                                    lineWidth: 0,
-                                                    hidden: false,
-                                                    datasetIndex: i
-                                                }));
-                                        },
-                                        font: {
-                                            size: 12,
-                                            weight: "bold"
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    beginAtZero: true,
-                                    grace: '15%'
-                                },
-                                y: {
-                                    ticks: {
-                                        autoSkip: false
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                } else {
-
-                    const chart = charts[chartId];
-
-                    chart.data.labels = labels;
-                    chart.data.datasets[0].data = stocks;
-                    chart.data.datasets[0].backgroundColor = colors;
-                    chart.data.datasets[1].data = [...safety];
-                    chart.data.datasets[2].data = Array(labels.length).fill(minStock);
-                    chart.data.datasets[1].data.length = 0;
-                    chart.data.datasets[1].data.push(...safety);
-                    chart.update('active');
-                }
-
-                if (selectedModels.has(modelName)) {
-                    showModel(modelName);
-                }
-            });
+        if (!modelPartOrder[modelName]) {
+            modelPartOrder[modelName] = modelData.map(i => i.part_name);
         }
 
+        const fixedOrder = modelPartOrder[modelName];
+        const labels = fixedOrder;
+        const stocks = [];
+        const safety = [];
+        const colors = [];
+
+        fixedOrder.forEach(partName => {
+            const found = modelData.find(i => i.part_name === partName);
+
+            if (found) {
+                const stock = parseInt(found.current_stock);
+                const safetyStock = Number(found.safety_stock) * 1.2;
+                const stockValues = modelData.map(i => parseInt(i.current_stock));
+                const minStockValue = Math.min(...stockValues);
+
+                stocks.push(stock);
+                safety.push(safetyStock);
+
+                if (stock === minStockValue) {
+                    colors.push("#dc2626");
+                } else if (stock < safetyStock) {
+                    colors.push("#facc15");
+                } else {
+                    colors.push("#16a34a");
+                }
+            } else {
+                stocks.push(0);
+                safety.push(0);
+                colors.push("#ccc");
+            }
+        });
+
+        // ✅ SELALU hitung minStock di sini (penting!)
+        const minStock = Math.min(...stocks);
+
+        if (!charts[chartId]) {
+            // === BUAT CHART BARU ===
+            const box = document.createElement("div");
+            box.className = "model-box";
+            box.id = "box-" + chartId;
+
+            box.innerHTML = `
+                <div class="model-title">${modelName}</div>
+                <div class="chart-wrapper"><canvas id="${chartId}"></canvas></div>`;
+
+            container.appendChild(box);
+
+            const ctx = document.getElementById(chartId).getContext("2d");
+
+            charts[chartId] = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "",
+                            data: stocks,
+                            backgroundColor: colors,
+                            barThickness: 12,
+                            maxBarThickness: 30,
+                            borderWidth: 0
+                        },
+                        {
+                            type: "line",
+                            label: "Safety Stock",
+                            data: safety,
+                            borderColor: "#2c08f5",
+                            borderWidth: 1,
+                            borderDash: [15, 5],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0
+                        },
+                        {
+                            type: "line",
+                            label: "",
+                            data: Array(labels.length).fill(minStock),
+                            borderColor: "#000",
+                            borderWidth: 2,
+                            borderDash: [20, 10],
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0,
+                            hidden: true
+                        }
+                    ]
+                },
+                plugins: [valueLabelPlugin],
+                options: {
+                    indexAxis: 'y',
+                    animation: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: { right: 50 }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: "bottom",
+                            labels: {
+                                generateLabels(chart) {
+                                    const datasets = chart.data.datasets;
+                                    return datasets
+                                        .filter(ds => ds.label)
+                                        .map((ds, i) => ({
+                                            text: "● - ● - ● - ● -  " + ds.label,
+                                            fillStyle: 'transparent',
+                                            strokeStyle: '#2c08f5',
+                                            fontColor: '#2c08f5',
+                                            lineWidth: 0,
+                                            hidden: false,
+                                            datasetIndex: i
+                                        }));
+                                },
+                                font: { size: 12, weight: "bold" }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, grace: '15%' },
+                        y: { ticks: { autoSkip: false } }
+                    }
+                }
+            });
+
+        } else {
+            const chart = charts[chartId];
+
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = stocks;
+            chart.data.datasets[0].backgroundColor = colors;
+            chart.data.datasets[1].data = [...safety];
+            chart.data.datasets[2].data = Array(labels.length).fill(minStock);
+
+            chart.update('active');
+        }
+
+        // Tampilkan atau sembunyikan box sesuai pilihan user
+        if (selectedModels.has(modelName)) {
+            showModel(modelName);
+        } else {
+            hideModel(modelName);
+        }
+    });
+    }
         function hideModel(modelName) {
             const chartId = "chart-" + modelName.replace(/\s+/g, '');
             const box = document.getElementById("box-" + chartId);
@@ -601,80 +621,79 @@
 
         let autoScrollActive = true;
         let scrollDirection = 1;
-        let scrollSpeed = 0.5;
-        let animationId;
-        let isRefreshing = false;
+        let scrollSpeed = 0.85;
+        let animationId = null;
+        let isAtEdge = false;
+        let scrollStarted = false;
 
         function autoScroll() {
-
-            if (!autoScrollActive) return;
+            if (!autoScrollActive || isAtEdge) return;
 
             container.scrollTop += scrollSpeed * scrollDirection;
 
-            const bottomReached =
-                container.scrollTop + container.clientHeight >= container.scrollHeight;
+            const scrollTop    = container.scrollTop;
+            const scrollHeight = container.scrollHeight;
+            const clientHeight = container.clientHeight;
 
-            const topReached =
-                container.scrollTop <= 0;
+            const canScroll    = scrollHeight > clientHeight + 5; // ada konten untuk di-scroll
 
-            // ===== SAMPAI BAWAH =====
-            if (bottomReached && scrollDirection === 1) {
-
-                scrollDirection = -1;
-
-                if (!isRefreshing) {
-                    isRefreshing = true;
-
-                    loadData().then(() => {
-                        isRefreshing = false;
-                    });
-                }
+            if (!canScroll) {
+                animationId = requestAnimationFrame(autoScroll);
+                return;
             }
 
-            // ===== SAMPAI ATAS =====
-            if (topReached && scrollDirection === -1) {
+            const reachedBottom = (scrollTop + clientHeight) >= (scrollHeight - 5);
+            const reachedTop    = scrollTop <= 2;
 
-                scrollDirection = 1;
+            if (reachedBottom && scrollDirection === 1) {
+                isAtEdge = true;
+                setTimeout(() => {
+                    scrollDirection = -1;
+                    isAtEdge = false;
+                    animationId = requestAnimationFrame(autoScroll);
+                }, 1000); 
+                return;
+            }
 
-                if (!isRefreshing) {
-                    isRefreshing = true;
-
-                    loadData().then(() => {
-                        isRefreshing = false;
-                    });
-                }
+            if (reachedTop && scrollDirection === -1) {
+                isAtEdge = true;
+                loadData(); 
+                setTimeout(() => {
+                    scrollDirection = 1;
+                    isAtEdge = false;
+                    animationId = requestAnimationFrame(autoScroll);
+                }, 1000); 
+                return;
             }
 
             animationId = requestAnimationFrame(autoScroll);
         }
 
         function startScroll() {
-            cancelAnimationFrame(animationId);
+            if (animationId) cancelAnimationFrame(animationId);
+            isAtEdge = false;
             animationId = requestAnimationFrame(autoScroll);
         }
 
         function stopScroll() {
-            cancelAnimationFrame(animationId);
+            if (animationId) cancelAnimationFrame(animationId);
+            animationId = null;
         }
 
-        startScroll();
-
-        /* TOGGLE BUTTON ONLY */
+        // Toggle Button
         toggleBtn.addEventListener("click", () => {
             autoScrollActive = !autoScrollActive;
-
             if (autoScrollActive) {
-                toggleBtn.innerText = "Pause";
+                toggleBtn.textContent = "Pause";
                 toggleBtn.style.background = "#111";
                 startScroll();
             } else {
-                toggleBtn.innerText = "Play";
+                toggleBtn.textContent = "Play";
                 toggleBtn.style.background = "#16a34a";
                 stopScroll();
             }
         });
-
-
+        
         const valueLabelPlugin = {
             id: 'valueLabel',
             afterDatasetsDraw(chart) {
@@ -711,9 +730,13 @@
             }
         };
 
-        loadData();
+        loadData().then(() => {
+            setTimeout(() => {
+                startScroll(); // ← mulai scroll setelah data siap
+            }, 500);
+        });
 
-        setInterval(function() {
+        setInterval(function () {
             location.reload(true);
         }, 3600000);
         // setInterval(loadData, 2000);

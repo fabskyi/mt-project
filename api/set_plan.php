@@ -11,7 +11,7 @@ $stmt = $conn->prepare("
     INSERT INTO production_plan (lokasi_id, plan_qty, plan_date)
     VALUES (?, ?, ?)
     ON DUPLICATE KEY UPDATE
-        plan_qty = VALUES(plan_qty)
+    plan_qty = VALUES(plan_qty)
 ");
 
 $stmt->bind_param("iis", $lokasi, $plan, $date);

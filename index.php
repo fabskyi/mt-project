@@ -291,6 +291,16 @@
                 font-weight: 600;
                 display: inline-block;
             }
+            
+            .over {
+                background: #fee2e2;
+                color:  #ff7b00;
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                display: inline-block;
+            }
 
             .ok {
                 background: #dcfce7;
@@ -873,6 +883,30 @@
                 cursor: pointer;
             }
 
+            .btn-run-stop {
+                padding: 6px 12px;
+                border: none;
+                border-radius: 4px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .btn-run-stop.running {
+                background: #ff4444;
+                color: white;
+            }
+
+            .btn-run-stop.stopped {
+                background: #4CAF50;
+                color: white;
+            }
+
+            .btn-run-stop:hover {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+
             @keyframes scaleIn {
                 from {
                     transform: scale(0.8);
@@ -918,20 +952,23 @@
                 <header class="topbar">
                     <h2 id="pageTitle">SUPERMARKET MACHINE SHOP - MS<?php echo $lokasi; ?></h2>
                     <div class="top-actions">
+
                         <select id="searchPart" onchange="loadItems()">
                             <option value="">All Parts</option>
                         </select>
 
                         <select id="sortStockSelect">
-                            <optgroup label="Part">
-                                <option value="part_asc">Part: A → Z</option>
-                                <option value="part_desc">Part: Z → A</option>
-                            </optgroup>
+                            <option value="">All Status</option>
+                            <option value="lower">🔴 Lower</option>
+                            <option value="ok">🟢 OK</option>
+                            <option value="over">🟠 Over</option>
                         </select>
+
                         <input type="text" id="searchInput" placeholder="Search model / part / barcode...">
                         <select id="modelSafetySelect">
                             <option value="">Model</option>
                         </select>
+
                         <input type="number" id="safetyStockInput" placeholder="Safety Stock">
                         <button class="btn-safety" onclick="submitSafetyStock()"> Submit </button>
                         <button class="btn-nav" onclick="openAddModal()">Add Item</button>
@@ -1026,12 +1063,12 @@
                                 <th>Model</th>
                                 <th>Part</th>
                                 <th>Part Number</th>
-                                <th>Barcode</th>
+                                <th>Barcode</th>    
                                 <th>Stock</th>
                                 <th>Add</th>
                                 <th>Safety</th>
                                 <th>Status</th>
-                                <th>Action</th> <!-- TAMBAH INI -->
+                                <th>Production Status</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -1127,50 +1164,42 @@
                         populatePartDropdown(data);
                         // ===== HASH CHECK TAMBAHAN =====
 
-                        let search = document.getElementById("searchPart")?.value.toLowerCase() || "";
+                      let search = document.getElementById("searchPart")?.value.toLowerCase() || "";
 
                         if (search !== "") {
                             data = data.filter(item =>
                                 item.part_name.toLowerCase().includes(search)
                             );
                         }
-                        let newHash = JSON.stringify(data);
 
+                        // 1. Buat hash SEBELUM filter status, tapi SERTAKAN currentSort
+                        let newHash = JSON.stringify(data) + currentSort;
+
+                        // 2. Bandingkan dulu
                         if (newHash === lastHash) {
-                            return; // data sama → tidak update tabel
+                            return; // data + filter sama → skip
                         }
 
+                        // 3. Baru simpan hash baru
                         lastHash = newHash;
+
+                        // 4. Sort & filter status
                         data.sort((a, b) => a.item_id - b.item_id);
 
+                        if (currentSort === "lower") {
+                            data = data.filter(item => parseInt(item.current_stock) < parseInt(item.safety_stock));
+                        }
+                        if (currentSort === "ok") {
+                            data = data.filter(item => parseInt(item.current_stock) === parseInt(item.safety_stock));
+                        }
+                        if (currentSort === "over") {
+                            data = data.filter(item => parseInt(item.current_stock) > parseInt(item.safety_stock));
+                        }
 
+                        // 5. Baru render tabel
                         let tbody = document.querySelector("#stockTable tbody");
-
-                        // if (currentSort === "low") {
-                        //     data.sort((a, b) =>
-                        //         (parseInt(a.current_stock) || 0) - (parseInt(b.current_stock) || 0)
-                        //     );
-                        // }
-
-                        // if (currentSort === "high") {
-                        //     data.sort((a, b) =>
-                        //         (parseInt(b.current_stock) || 0) - (parseInt(a.current_stock) || 0)
-                        //     );
-                        // }
-
-                        if (currentSort === "part_asc") {
-                            data.sort((a, b) =>
-                                a.part_name.localeCompare(b.part_name)
-                            );
-                        }
-
-                        if (currentSort === "part_desc") {
-                            data.sort((a, b) =>
-                                b.part_name.localeCompare(a.part_name)
-                            );
-                        }
-
                         tbody.innerHTML = "";
+
 
                         let totalItem = 0;
                         let totalStock = 0;
@@ -1228,18 +1257,18 @@
                                         <td>${safety}</td>
 
                                         <td id="status-${item.item_id}">
-                                            ${isLow ? '<span class="low">LOW</span>' : '<span class="ok">OK</span>'}
+                                            ${safety === stock ? '<span class="ok">OK</span>' : 
+                                            safety > stock ? '<span class="low">LOWER</span>' : 
+                                            '<span class="over">OVER</span>'}
                                         </td>
 
-                                        <td>
-                                         <button class="btn-delete"
-                                            data-model="${item.model_id}"
-                                            data-item="${item.item_id}"
-                                            data-part="${item.part_name}"
-                                            onclick="deleteItem(this)">
-                                            Delete
+                                     <td>
+                                        <button class="btn-run-stop ${item.production_status ? 'running' : 'stopped'}"
+                                            data-item="${item.model_item_id}" 
+                                            onclick="toggleRunStop(this)">
+                                            ${item.production_status ? 'STOP' : 'RUN'}
                                         </button>
-                                        </td>
+                                    </td>
                                     `;
 
                             tbody.appendChild(row);
@@ -1260,6 +1289,37 @@
 
                     });
             }
+
+          function toggleRunStop(button) {
+            const itemId = button.dataset.item;
+            
+            fetch('./api/toggle_production.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `item_id=${itemId}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) { 
+                    const isRunning = data.status === 1;
+                    button.textContent = isRunning ? 'STOP' : 'RUN';
+                    button.classList.toggle('running', isRunning);
+                    button.classList.toggle('stopped', !isRunning);
+                    
+                    // Update row class untuk highlight
+                    const row = button.closest('tr');
+                    row.classList.toggle('running-row', isRunning);
+                    
+                    console.log(`Item ${itemId}: ${data.message}`);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error('Toggle failed:', err);
+                alert('Connection error');
+            });
+        }
 
             function updateStock(itemId, input) {
 

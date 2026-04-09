@@ -54,7 +54,6 @@ try {
         $qty  = $before_stock - $new_stock;
     }
 
-    // 3️⃣ Update stock
     $update = $conn->prepare("
         UPDATE items 
         SET current_stock=?, updated_at=NOW()
@@ -63,7 +62,6 @@ try {
     $update->bind_param("ii", $new_stock, $item_id);
     $update->execute();
 
-    // 4️⃣ Insert log
     $note = ($lokasi_id == 1) ? "ADMIN MS 1" : "ADMIN MS 2";
 
     $log = $conn->prepare("
@@ -84,7 +82,6 @@ try {
     );
     $log->execute();
 
-    // 5️⃣ Ambil safety_stock
     $safetyQ = $conn->prepare("
         SELECT safety_stock 
         FROM model_items 

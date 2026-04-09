@@ -35,7 +35,7 @@ $row = $result->fetch_assoc();
 echo json_encode([
     "success" => true,
     "item_id" => $row['id'],
-    "part" => $row['part_name'],
+    "part" => $row['part_number'],  // ← ubah dari part_name ke part_number
     "models" => $row['models'],
     "stock" => $row['current_stock']
 ]);

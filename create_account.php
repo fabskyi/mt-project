@@ -12,7 +12,6 @@ if (isset($_POST['create'])) {
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $role = $_POST['role'];
 
-    // Cek NIK sudah ada atau belum
     $check = $conn->prepare("SELECT id FROM users WHERE nik=?");
     $check->bind_param("s", $nik);
     $check->execute();
@@ -191,6 +190,7 @@ if (isset($_POST['create'])) {
                 <option value="operator">Operator</option>
                 <option value="ms1">MS1</option>
                 <option value="ms2">MS2</option>
+                <option value="machining">Machining</option>
                 <option value="all">All Access</option>
             </select>
 
