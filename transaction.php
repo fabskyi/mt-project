@@ -1121,6 +1121,7 @@ $nama = $dataUser['nama'] ?? 'Unknown';
         let html5QrCode = null;
         let scannerReady = false;
         let scanLocked = false;
+        let isTransitioning = false; // ← TAMBAH INI
         const SCAN_COOL = 1500;
 
         /* ── AUDIO / VIBRATE ── */
@@ -1198,7 +1199,14 @@ $nama = $dataUser['nama'] ?? 'Unknown';
         /* ── CAMERA ── */
         function openCamera() {
             if (!mode) { alert("Pilih mode dulu (IN / OUT / RETURN)"); return; }
-            if (scannerReady) return;
+
+            // Cegah multiple calls
+            if (scannerReady || isTransitioning) {
+                console.log("Camera already active or transitioning");
+                return;
+            }
+
+            isTransitioning = true; // ← LOCK
             openPopup("cameraModal");
             setCamStatus("", "Memulai kamera...");
             scanLocked = false;
@@ -1206,33 +1214,87 @@ $nama = $dataUser['nama'] ?? 'Unknown';
             const config = { fps: 25, qrbox: { width: 320, height: 100 } };
 
             startCam({ facingMode: "environment" }, config)
-                .catch(() => { setCamStatus("warning", "⚠ Mencoba kamera lain..."); return startCam(true, config); })
-                .catch(() => startCam(undefined, config))
+                .catch(() => {
+                    setCamStatus("warning", "⚠ Mencoba kamera lain...");
+                    return new Promise(resolve => setTimeout(resolve, 300)) // ← DELAY
+                        .then(() => startCam(true, config));
+                })
+                .catch(() => {
+                    return new Promise(resolve => setTimeout(resolve, 300)) // ← DELAY
+                        .then(() => startCam(undefined, config));
+                })
                 .catch(err => {
                     setCamStatus("error", "❌ " + (err.message ?? err));
+                    isTransitioning = false; // ← UNLOCK on error
                     setTimeout(() => closePopup("cameraModal"), 2000);
                 });
         }
+
         function startCam(cam, config) {
             return html5QrCode.start(cam ?? { facingMode: "environment" }, config, onScanSuccess)
-                .then(() => { scannerReady = true; setCamStatus("", "📷 Arahkan ke barcode..."); });
+                .then(() => {
+                    scannerReady = true;
+                    isTransitioning = false; // ← UNLOCK setelah berhasil
+                    setCamStatus("", "📷 Arahkan ke barcode...");
+                })
+                .catch(err => {
+                    isTransitioning = false; // ← UNLOCK on error
+                    throw err; // Re-throw untuk catch chain
+                });
         }
+
+        
         function onScanSuccess(txt) {
-            if (scanLocked) return;
+            if (scanLocked || isTransitioning) return; // ← Tambah check isTransitioning
+
             scanLocked = true;
             beep(1800, 80); vibrate(60);
             setCamStatus("ok", "✅ " + txt);
             scanInput.value = txt;
-            stopCamera(() => processBarcode(txt));
+
+            // Tambah delay sebelum stop untuk memastikan scan selesai
+            setTimeout(() => {
+                stopCamera(() => processBarcode(txt));
+            }, 100);
+
             setTimeout(() => { scanLocked = false; }, SCAN_COOL);
         }
+
+
         function stopCamera(cb) {
-            if (!scannerReady) { if (cb) cb(); return; }
-            html5QrCode.stop().then(() => {
-                scannerReady = false; html5QrCode.clear();
-                closePopup("cameraModal"); if (cb) cb();
-            }).catch(() => { scannerReady = false; closePopup("cameraModal"); if (cb) cb(); });
+            if (!scannerReady && !isTransitioning) {
+                if (cb) cb();
+                return;
+            }
+
+            isTransitioning = true; // ← LOCK
+
+            if (!scannerReady) {
+                // Jika scanner belum ready tapi transitioning, tunggu sebentar
+                setTimeout(() => {
+                    isTransitioning = false;
+                    closePopup("cameraModal");
+                    if (cb) cb();
+                }, 500);
+                return;
+            }
+
+            html5QrCode.stop()
+                .then(() => {
+                    scannerReady = false;
+                    html5QrCode.clear();
+                    isTransitioning = false; // ← UNLOCK
+                    closePopup("cameraModal");
+                    if (cb) cb();
+                })
+                .catch(() => {
+                    scannerReady = false;
+                    isTransitioning = false; // ← UNLOCK
+                    closePopup("cameraModal");
+                    if (cb) cb();
+                });
         }
+
         function closeCamera() { stopCamera(); }
 
         /* ── PROCESS BARCODE ── */
