@@ -1,8 +1,14 @@
 <?php
 session_start();
 require_once __DIR__ . "/config.php";
+
 header("Content-Type: application/json");
 
+// ================= DEBUG (hapus setelah berhasil) =================
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+// =================================================================
 
 if (!isset($_SESSION['nik'])) {
     echo json_encode(["success" => false, "error" => "Session expired"]);
@@ -13,81 +19,92 @@ $nik_karyawan = $_SESSION['nik'];
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-$mode = strtoupper($data['mode'] ?? '');
+$mode       = strtoupper($data['mode'] ?? '');
 $scan_input = trim($data['part'] ?? '');
-$qty  = intval($data['qty'] ?? 0);
+$qty        = intval($data['qty'] ?? 0);
 
-if ($mode == '' || $scan_input == '' || $qty <= 0) {
+if ($mode === '' || $scan_input === '' || $qty <= 0) {
     echo json_encode(["success" => false, "error" => "Data tidak lengkap"]);
     exit;
 }
 
+// ====================== 1. Ambil data item + lokasi ======================
 $stmt = $conn->prepare("
-    SELECT id, part_name, current_stock
+    SELECT id, part_name, current_stock, location_id
     FROM items
     WHERE part_number = ?
     LIMIT 1
 ");
 $stmt->bind_param("s", $scan_input);
-error_log("scan_input: " . $scan_input);
 $stmt->execute();
-$res = $stmt->get_result();
+$stmt->bind_result($item_id, $part_name, $current_stock, $location_id);
+$found = $stmt->fetch();
+$stmt->close();
 
-if ($res->num_rows == 0) {
+if (!$found) {
     echo json_encode(["success" => false, "error" => "Part tidak ditemukan"]);
     exit;
 }
 
-$item = $res->fetch_assoc();
-$item_id = $item['id'];
-$current_stock = intval($item['current_stock']);
+$current_stock = intval($current_stock ?? 0);
+$location_id   = intval($location_id ?? 1);
 
-if ($mode == "IN" || $mode == "RETURN") {
+// Mapping location_id ke teks lokasi
+$lokasi = ($location_id == 2) ? "MS2" : "MS1";
+
+// ====================== 2. Hitung stock baru ======================
+if ($mode === "IN" || $mode === "RETURN") {
     $new_stock = $current_stock + $qty;
-} else if ($mode == "OUT") {
-
+} else if ($mode === "OUT") {
     if ($current_stock < $qty) {
         echo json_encode(["success" => false, "error" => "Stock tidak cukup"]);
         exit;
     }
-
     $new_stock = $current_stock - $qty;
 } else {
     echo json_encode(["success" => false, "error" => "Mode tidak valid"]);
     exit;
 }
 
-$update = $conn->prepare("
-    UPDATE items
-    SET current_stock=?
-    WHERE id=?
-");
+// ====================== 3. Update stock ======================
+$update = $conn->prepare("UPDATE items SET current_stock = ? WHERE id = ?");
 $update->bind_param("ii", $new_stock, $item_id);
 $update->execute();
+$update->close();
 
+// ====================== 4. Cek NIK ======================
 $cekNik = $conn->prepare("SELECT nik FROM karyawan WHERE nik = ?");
 $cekNik->bind_param("s", $nik_karyawan);
 $cekNik->execute();
-$cekRes = $cekNik->get_result();
+$cekNik->bind_result($dummy);
+$nik_exists = $cekNik->fetch();
+$cekNik->close();
 
-if ($cekRes->num_rows == 0) {
-    echo json_encode([
-        "success" => false,
-        "error" => "NIK tidak terdaftar di tabel karyawan"
-    ]);
+if (!$nik_exists) {
+    echo json_encode(["success" => false, "error" => "NIK tidak terdaftar di tabel karyawan"]);
     exit;
 }
+
+// ====================== 5. Insert transaksi ======================
 $type = strtolower($mode);
 
-$insert = $conn->prepare("
-    INSERT INTO transactions (item_id, type, qty, nik, created_at)
-    VALUES (?, ?, ?, ?, NOW())
-");
+try {
+    $insert = $conn->prepare("
+        INSERT INTO transactions (item_id, type, qty, nik, lokasi, created_at)
+        VALUES (?, ?, ?, ?, ?, NOW())
+    ");
+    $insert->bind_param("isiss", $item_id, $type, $qty, $nik_karyawan, $lokasi);
+    $insert->execute();
+    $insert->close();
 
-$insert->bind_param("isis", $item_id, $type, $qty, $nik_karyawan);
-$insert->execute();
+    echo json_encode([
+        "success" => true,
+        "stock_after" => $new_stock
+    ]);
 
-echo json_encode([
-    "success" => true,
-    "stock_after" => $new_stock
-]);
+} catch (mysqli_sql_exception $e) {
+    echo json_encode([
+        "success" => false,
+        "error" => "Database error: " . $e->getMessage()
+    ]);
+}
