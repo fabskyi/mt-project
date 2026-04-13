@@ -32,6 +32,7 @@ $nama = $dataUser['nama'] ?? 'Unknown';
 <html>
 
 <head>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <title>Transaction</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="js/html5-qrcode.min.js"></script>
