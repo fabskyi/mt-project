@@ -34,7 +34,7 @@ $nama = $dataUser['nama'] ?? 'Unknown';
 <head>
     <title>Transaction</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script src="js/html5-qrcode.min.js"></script>
 
     <style>
         /* ════════════════════════════════════
@@ -1243,7 +1243,7 @@ $nama = $dataUser['nama'] ?? 'Unknown';
                 });
         }
 
-        
+            
         function onScanSuccess(txt) {
             if (scanLocked || isTransitioning) return; // ← Tambah check isTransitioning
 
