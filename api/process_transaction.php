@@ -1,8 +1,8 @@
 <?php
 session_start();
-require_once "config.php";
-
+require_once __DIR__ . "/config.php";
 header("Content-Type: application/json");
+
 
 if (!isset($_SESSION['nik'])) {
     echo json_encode(["success" => false, "error" => "Session expired"]);
