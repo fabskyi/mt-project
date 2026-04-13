@@ -4,10 +4,11 @@ require_once __DIR__ . "/config.php";
 
 header("Content-Type: application/json");
 
-// Aktifkan error reporting sementara (hapus setelah debug selesai)
+// === DEBUG (hapus setelah semua berjalan lancar) ===
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+// ===================================================
 
 if (!isset($_SESSION['nik'])) {
     echo json_encode(["success" => false, "error" => "Session expired"]);
@@ -45,7 +46,7 @@ if (!$found) {
     exit;
 }
 
-$current_stock = intval($current_stock);
+$current_stock = intval($current_stock ?? 0);
 
 // ====================== 2. Hitung stock baru ======================
 if ($mode === "IN" || $mode === "RETURN") {
@@ -71,7 +72,7 @@ $update->close();
 $cekNik = $conn->prepare("SELECT nik FROM karyawan WHERE nik = ?");
 $cekNik->bind_param("s", $nik_karyawan);
 $cekNik->execute();
-$cekNik->bind_result($dummy_nik);
+$cekNik->bind_result($dummy);
 $nik_exists = $cekNik->fetch();
 $cekNik->close();
 
@@ -85,12 +86,14 @@ if (!$nik_exists) {
 
 // ====================== 5. Insert transaksi ======================
 $type = strtolower($mode);
+$lokasi = "Gudang Utama";     // ← Ubah sesuai kebutuhan kamu (bisa kosong '' jika boleh)
 
 $insert = $conn->prepare("
-    INSERT INTO transactions (item_id, type, qty, nik, created_at)
-    VALUES (?, ?, ?, ?, NOW())
+    INSERT INTO transactions (item_id, type, qty, nik, lokasi, created_at)
+    VALUES (?, ?, ?, ?, ?, NOW())
 ");
-$insert->bind_param("isis", $item_id, $type, $qty, $nik_karyawan);
+
+$insert->bind_param("isiss", $item_id, $type, $qty, $nik_karyawan, $lokasi);
 $insert->execute();
 $insert->close();
 
