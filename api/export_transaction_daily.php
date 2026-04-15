@@ -5,7 +5,7 @@ require_once __DIR__ . "/config.php";
 if (!isset($_SESSION['user_id'])) { header("Location: ../home.php"); exit; }
 
 $role = $_SESSION['role'];
-if ($role !== 'machining' && $role !== 'all') {
+if ($role !== 'ms2' && $role !== 'ms1' && $role !== 'machining' && $role !== 'all'){
     http_response_code(403);
     die("Akses ditolak");
 }
