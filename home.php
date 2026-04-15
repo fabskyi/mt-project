@@ -5,7 +5,6 @@ session_regenerate_id(true);
 require_once __DIR__ . "/api/config.php";
 
 if (isset($_POST['login'])) {
-
     $nik = $_POST['nik'];
     $password = $_POST['password'];
 
@@ -26,32 +25,45 @@ if (isset($_POST['login'])) {
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-
         $user = $result->fetch_assoc();
 
-
         if (password_verify($password, $user['password'])) {
-
+            // Set session data
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['nik']     = $user['nik'];
             $_SESSION['role']    = $user['role'];
             $_SESSION['nama']    = $user['nama'];
 
-            if ($user['role'] == "monitor") {
-                header("Location: monitor.php");
-            } elseif ($user['role'] == "ms1") {
-                header("Location: index.php?lokasi=1");
-            } elseif ($user['role'] == "ms2") {
-                header("Location: index.php?lokasi=2");
-            } elseif ($user['role'] == "all") {
-                header("Location: home_menu.php");
-            } elseif ($user['role'] == "operator") {
-                header("Location: transaction.php");
-            } elseif ($user['role'] == "machining") {
-                header("Location: transaction.php");
+            // Redirect berdasarkan role - SELARAS DENGAN CONTROL PANEL
+            switch ($user['role']) {
+                case "admin":
+                case "all":
+                    header("Location: home_menu.php");  // Admin control panel
+                    break;
+                
+                case "ms_1":
+                case "ms1":
+                    header("Location: home_menu.php");  // Menu control untuk ms_1
+                    break;
+                
+                case "ms_2":
+                case "ms2":
+                    header("Location: home_menu.php");  // Menu control untuk ms_2
+                    break;
+                
+                case "monitor":
+                    header("Location: monitor.php");
+                    break;
+                
+                case "operator":
+                case "machining":
+                    header("Location: transaction.php");
+                    break;
+                
+                default:
+                    header("Location: home_menu.php");
+                    break;
             }
-
-
             exit;
         } else {
             $error = "Password salah";
@@ -64,10 +76,9 @@ if (isset($_POST['login'])) {
 
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Inventory Management System</title>
-    <meta name="viewport" content="width=device-    width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         * {
@@ -103,7 +114,6 @@ if (isset($_POST['login'])) {
                 opacity: 0;
                 transform: translateY(15px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -203,13 +213,10 @@ if (isset($_POST['login'])) {
             }
         }
     </script>
-
 </head>
 
 <body>
-
     <div class="box">
-
         <div class="logo">
             <h2>PT. YADIN</h2>
             <p>Supermarket Machine Shop</p>
@@ -218,20 +225,17 @@ if (isset($_POST['login'])) {
         <?php if (isset($error)) echo "<div class='error'>$error</div>"; ?>
 
         <form method="POST">
-
             <div class="input-group">
-                <input type="text" name="nik" placeholder="NIK / USERNAME" required>
+                <input type="text" name="nik" placeholder="NIK / USERNAME" required autocomplete="username">
             </div>
 
             <div class="input-group">
-                <input type="password" id="password" name="password" placeholder="PASSWORD" required>
+                <input type="password" id="password" name="password" placeholder="PASSWORD" required autocomplete="current-password">
                 <span class="toggle" onclick="togglePassword()">Show</span>
             </div>
 
             <button type="submit" name="login">LOGIN</button>
-
         </form>
-
     </div>
 
     <script>
@@ -248,7 +252,5 @@ if (isset($_POST['login'])) {
             }
         }
     </script>
-
 </body>
-
 </html>
