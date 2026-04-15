@@ -5,12 +5,14 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-if ($_SESSION['role'] != 'operator' && $_SESSION['role'] != 'all' && $_SESSION['role'] != 'machining') {
+if ($_SESSION['role'] != 'operator' && $_SESSION['role'] != 'all' && $_SESSION['role'] != 'machining' && $_SESSION['role'] != 'ms1' && $_SESSION['role'] != 'ms2') {
     die("Akses ditolak");
 }
 
 $isAdmin = ($_SESSION['role'] === 'all');
 $isMachining = ($_SESSION['role'] === 'machining');
+$isMachining = ($_SESSION['role'] === 'ms2');
+$isMachining = ($_SESSION['role'] === 'ms1');
 $isOperator = ($_SESSION['role'] === 'operator');
 
 if ($isAdmin) {
@@ -28,6 +30,7 @@ $result = $stmt->get_result();
 $dataUser = $result->fetch_assoc();
 $nama = $dataUser['nama'] ?? 'Unknown';
 ?>
+
 <!DOCTYPE html>
 <html>
 
