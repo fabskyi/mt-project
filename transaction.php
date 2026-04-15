@@ -10,9 +10,8 @@ if ($_SESSION['role'] != 'operator' && $_SESSION['role'] != 'all' && $_SESSION['
 }
 
 $isAdmin = ($_SESSION['role'] === 'all');
-$isMachining = ($_SESSION['role'] === 'machining');
-$isMachining = ($_SESSION['role'] === 'ms2');
-$isMachining = ($_SESSION['role'] === 'ms1');
+$machiningRoles = ['machining', 'ms2', 'ms1'];
+$isMachining = in_array($_SESSION['role'], $machiningRoles);
 $isOperator = ($_SESSION['role'] === 'operator');
 
 if ($isAdmin) {
