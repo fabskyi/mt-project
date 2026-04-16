@@ -454,6 +454,40 @@ if ($role == "monitor") {
             background: #b02a37;
         }
 
+        /* ===== REFRESH BUTTON ===== */
+        .btn-refresh {
+            padding: 7px 14px;
+            background: #0d9488;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-refresh:hover {
+            background: #0f766e;
+        }
+
+        .btn-refresh .icon {
+            display: inline-block;
+            font-style: normal;
+        }
+
+        .btn-refresh.spinning .icon {
+            animation: spinOnce 0.6s ease forwards;
+        }
+
+        @keyframes spinOnce {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+        /* ========================== */
+
         .logo {
             margin-bottom: 35px;
             padding-bottom: 15px;
@@ -973,6 +1007,13 @@ if ($role == "monitor") {
                     <button class="btn-safety" onclick="submitSafetyStock()"> Submit </button>
                     <button class="btn-nav" onclick="openAddModal()">Add Item</button>
                     <button class="btn-nav" onclick="openHistory()">History</button>
+
+                    <!-- ===== TOMBOL REFRESH MANUAL ===== -->
+                    <button id="btnRefresh" class="btn-refresh" onclick="manualRefresh()">
+                        <i class="icon">⟳</i> Refresh
+                    </button>
+                    <!-- =================================== -->
+
                     <?php if ($_SESSION['role'] == 'all'): ?>
                         <button class="btn-back" onclick="goBack()">Back</button>
                     <?php endif; ?>
@@ -1143,6 +1184,7 @@ if ($role == "monitor") {
         </div>
     </div>
     <script>
+
         let currentSort = "";
         let currentLokasi = <?php echo $lokasi; ?>;
         let isSearching = false;
@@ -1152,8 +1194,26 @@ if ($role == "monitor") {
         let rowMap = {};
         let lastHash = "";
 
-        function loadItems() {
+        function manualRefresh() {
+            const btn = document.getElementById("btnRefresh");
+            lastHash = "";
 
+            btn.classList.remove("spinning");
+            void btn.offsetWidth;
+            btn.classList.add("spinning");
+
+            btn.disabled = true;
+
+            loadItems();
+            loadPlan();
+
+            setTimeout(() => {
+                btn.classList.remove("spinning");
+                btn.disabled = false;
+            }, 800);
+        }
+
+        function loadItems() {
             fetch("./api/get_items.php?lokasi_id=" + currentLokasi)
                 .then(res => res.json())
                 .then(response => {
