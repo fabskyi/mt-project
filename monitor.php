@@ -77,7 +77,7 @@
         .model-container {
             flex: 1;
             overflow-y: auto;
-            padding: 0 40px 40px 40px;
+            padding: 0 40px 80px 40px;
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 15px;
@@ -91,6 +91,7 @@
             flex-direction: column;
             height: 280px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+             margin: 0 0 15px 0;  /* ← TAMBAHKAN ini */
         }
 
         .model-title {
@@ -222,7 +223,7 @@
                 <div class="dropdown-content" id="dropdownContent"></div>
             </div>
 
-            
+
             <button id="scrollToggle">Pause</button>
             <div class="clock" id="clock"></div>
         </div>
@@ -283,7 +284,7 @@
         updateClock();
 
         /* ===============================
-           LOAD DATA (PRO VERSION)
+           LOAD DATA (AUTO UPDATE VERSION)
         ================================ */
 
         async function loadData() {
@@ -327,12 +328,11 @@
             document.getElementById("lowCount").innerHTML = "LOW: " + low;
 
             // INIT DROPDOWN SEKALI
-           if (!dropdownInitialized) {
+            if (!dropdownInitialized) {
                 const searchWrapper = document.createElement("div");
                 searchWrapper.innerHTML = `<input type="text" id="modelSearch" class="dropdown-search" placeholder="Search model...">`;
                 dropdownContent.appendChild(searchWrapper);
 
-                // ✅ Hanya satu deklarasi selectAllLabel
                 const selectAllLabel = document.createElement("label");
                 selectAllLabel.innerHTML = `<input type="checkbox" id="selectAllModels"> Select All`;
                 dropdownContent.appendChild(selectAllLabel);
@@ -349,8 +349,8 @@
                         selectedModels.add(modelName);
                     }
 
-                  const label = document.createElement("label");
-                    label.dataset.model = modelName; // ← tambah ini
+                    const label = document.createElement("label");
+                    label.dataset.model = modelName;
                     label.innerHTML = `
                         <input type="checkbox" value="${modelName}" ${selectedModels.has(modelName) ? "checked" : ""}>
                         ${modelName}
@@ -422,7 +422,7 @@
 
                     });
 
-                 const modelSearch = document.getElementById("modelSearch");
+                    const modelSearch = document.getElementById("modelSearch");
                     modelSearch.addEventListener("input", function () {
                         const keyword = this.value.toLowerCase();
                         document.querySelectorAll('#dropdownContent label[data-model]').forEach(label => {
@@ -432,7 +432,7 @@
                     });
 
                     modelSearch.addEventListener("click", function (e) {
-                        e.stopPropagation(); // cegah dropdown tertutup saat klik search
+                        e.stopPropagation();
                     });
 
                 }, 100);
@@ -441,172 +441,176 @@
             updateCharts(grouped);
 
             document.getElementById("safeCount").innerHTML = "SAFE: " + safe;
-            // document.getElementById("warnCount").innerHTML = "WARNING: " + warn;
             document.getElementById("lowCount").innerHTML = "LOW: " + low;
         }
 
-/* ===============================
-   UPDATE CHARTS - FIXED (minStock Error Solved)
- ================================ */
+        /* ===============================
+           UPDATE CHARTS - SMOOTH VERSION
+         ================================ */
 
-function updateCharts(grouped) {
-    Object.keys(grouped).forEach(modelName => {
+        function updateCharts(grouped) {
+            Object.keys(grouped).forEach(modelName => {
 
-        const chartId = "chart-" + modelName.replace(/\s+/g, '');
-        let modelData = grouped[modelName];
+                const chartId = "chart-" + modelName.replace(/\s+/g, '');
+                let modelData = grouped[modelName];
 
-        modelData.sort((a, b) => a.part_name.localeCompare(b.part_name));
+                modelData.sort((a, b) => a.part_name.localeCompare(b.part_name));
 
-        if (!modelPartOrder[modelName]) {
-            modelPartOrder[modelName] = modelData.map(i => i.part_name);
-        }
-
-        const fixedOrder = modelPartOrder[modelName];
-        const labels = fixedOrder;
-        const stocks = [];
-        const safety = [];
-        const colors = [];
-
-        fixedOrder.forEach(partName => {
-            const found = modelData.find(i => i.part_name === partName);
-
-            if (found) {
-                const stock = parseInt(found.current_stock);
-                const safetyStock = Number(found.safety_stock) * 1.2;
-                const stockValues = modelData.map(i => parseInt(i.current_stock));
-                const minStockValue = Math.min(...stockValues);
-
-                stocks.push(stock);
-                safety.push(safetyStock);
-
-                if (stock === minStockValue) {
-                    colors.push("#dc2626");
-                } else if (stock < safetyStock) {
-                    colors.push("#facc15");
-                } else {
-                    colors.push("#16a34a");
+                if (!modelPartOrder[modelName]) {
+                    modelPartOrder[modelName] = modelData.map(i => i.part_name);
                 }
-            } else {
-                stocks.push(0);
-                safety.push(0);
-                colors.push("#ccc");
-            }
-        });
 
-        // ✅ SELALU hitung minStock di sini (penting!)
-        const minStock = Math.min(...stocks);
+                const fixedOrder = modelPartOrder[modelName];
+                const labels = fixedOrder;
+                const stocks = [];
+                const safety = [];
+                const colors = [];
 
-        if (!charts[chartId]) {
-            // === BUAT CHART BARU ===
-            const box = document.createElement("div");
-            box.className = "model-box";
-            box.id = "box-" + chartId;
+                fixedOrder.forEach(partName => {
+                    const found = modelData.find(i => i.part_name === partName);
 
-            box.innerHTML = `
+                    if (found) {
+                        const stock = parseInt(found.current_stock);
+                        const safetyStock = Number(found.safety_stock) * 1.2;
+                        const stockValues = modelData.map(i => parseInt(i.current_stock));
+                        const minStockValue = Math.min(...stockValues);
+
+                        stocks.push(stock);
+                        safety.push(safetyStock);
+
+                        if (stock === minStockValue) {
+                            colors.push("#dc2626");
+                        } else if (stock < safetyStock) {
+                            colors.push("#facc15");
+                        } else {
+                            colors.push("#16a34a");
+                        }
+                    } else {
+                        stocks.push(0);
+                        safety.push(0);
+                        colors.push("#ccc");
+                    }
+                });
+
+                const minStock = Math.min(...stocks);
+
+                if (!charts[chartId]) {
+                    // === BUAT CHART BARU ===
+                    const box = document.createElement("div");
+                    box.className = "model-box";
+                    box.id = "box-" + chartId;
+
+                    box.innerHTML = `
                 <div class="model-title">${modelName}</div>
                 <div class="chart-wrapper"><canvas id="${chartId}"></canvas></div>`;
 
-            container.appendChild(box);
+                    container.appendChild(box);
 
-            const ctx = document.getElementById(chartId).getContext("2d");
+                    const ctx = document.getElementById(chartId).getContext("2d");
 
-            charts[chartId] = new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: "",
-                            data: stocks,
-                            backgroundColor: colors,
-                            barThickness: 12,
-                            maxBarThickness: 30,
-                            borderWidth: 0
-                        },
-                        {
-                            type: "line",
-                            label: "Safety Stock",
-                            data: safety,
-                            borderColor: "#2c08f5",
-                            borderWidth: 1,
-                            borderDash: [15, 5],
-                            pointRadius: 0,
-                            fill: false,
-                            tension: 0
-                        },
-                        {
-                            type: "line",
-                            label: "",
-                            data: Array(labels.length).fill(minStock),
-                            borderColor: "#000",
-                            borderWidth: 2,
-                            borderDash: [20, 10],
-                            pointRadius: 0,
-                            fill: false,
-                            tension: 0,
-                            hidden: true
-                        }
-                    ]
-                },
-                plugins: [valueLabelPlugin],
-                options: {
-                    indexAxis: 'y',
-                    animation: false,
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: { right: 50 }
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: "bottom",
-                            labels: {
-                                generateLabels(chart) {
-                                    const datasets = chart.data.datasets;
-                                    return datasets
-                                        .filter(ds => ds.label)
-                                        .map((ds, i) => ({
-                                            text: "● - ● - ● - ● -  " + ds.label,
-                                            fillStyle: 'transparent',
-                                            strokeStyle: '#2c08f5',
-                                            fontColor: '#2c08f5',
-                                            lineWidth: 0,
-                                            hidden: false,
-                                            datasetIndex: i
-                                        }));
+                    charts[chartId] = new Chart(ctx, {
+                        type: "bar",
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: "",
+                                    data: stocks,
+                                    backgroundColor: colors,
+                                    barThickness: 12,
+                                    maxBarThickness: 30,
+                                    borderWidth: 0
                                 },
-                                font: { size: 12, weight: "bold" }
+                                {
+                                    type: "line",
+                                    label: "Safety Stock",
+                                    data: safety,
+                                    borderColor: "rgba(44, 8, 245, 0.4)",
+                                    borderWidth: 1,
+                                    borderDash: [15, 5],
+                                    pointRadius: 0, 
+                                    pointHoverRadius: 0, 
+                                    pointBorderWidth: 0, 
+                                    fill: false,
+                                    tension: 0
+                                },
+                                {
+                                    type: "line",
+                                    label: "",
+                                    data: Array(labels.length).fill(minStock),
+                                    borderColor: "#000",
+                                    borderWidth: 2,
+                                    borderDash: [20, 10],
+                                    pointRadius: 0,
+                                    fill: false,
+                                    tension: 0,
+                                    hidden: true
+                                }
+                            ]
+                        },
+                        plugins: [valueLabelPlugin],
+                        options: {
+                            indexAxis: 'y',
+                            animation: {
+                                duration: 750,
+                                easing: 'easeInOutQuart'
+                            },
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            layout: {
+                                padding: { right: 50 }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: "bottom",
+                                    labels: {
+                                        generateLabels(chart) {
+                                            const datasets = chart.data.datasets;
+                                            return datasets
+                                                .filter(ds => ds.label)
+                                                .map((ds, i) => ({
+                                                    text: "- - - - - - - -  " + ds.label,
+                                                    fillStyle: 'transparent',
+                                                    strokeStyle: '#2c08f5',
+                                                    fontColor: '#2c08f5',
+                                                    lineWidth: 0,
+                                                    hidden: false,
+                                                    datasetIndex: i
+                                                }));
+                                        },
+                                        font: { size: 12, weight: "bold" }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { beginAtZero: true, grace: '15%' },
+                                y: { ticks: { autoSkip: false } }
                             }
                         }
-                    },
-                    scales: {
-                        x: { beginAtZero: true, grace: '15%' },
-                        y: { ticks: { autoSkip: false } }
-                    }
+                    });
+
+                } else {
+                    // === UPDATE CHART YANG SUDAH ADA (SMOOTH) ===
+                    const chart = charts[chartId];
+
+                    chart.data.labels = labels;
+                    chart.data.datasets[0].data = stocks;
+                    chart.data.datasets[0].backgroundColor = colors;
+                    chart.data.datasets[1].data = [...safety];
+                    chart.data.datasets[2].data = Array(labels.length).fill(minStock);
+
+                    chart.update('active');
+                }
+
+                // Tampilkan atau sembunyikan box sesuai pilihan user
+                if (selectedModels.has(modelName)) {
+                    showModel(modelName);
+                } else {
+                    hideModel(modelName);
                 }
             });
-
-        } else {
-            const chart = charts[chartId];
-
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = stocks;
-            chart.data.datasets[0].backgroundColor = colors;
-            chart.data.datasets[1].data = [...safety];
-            chart.data.datasets[2].data = Array(labels.length).fill(minStock);
-
-            chart.update('active');
         }
-
-        // Tampilkan atau sembunyikan box sesuai pilihan user
-        if (selectedModels.has(modelName)) {
-            showModel(modelName);
-        } else {
-            hideModel(modelName);
-        }
-    });
-    }
         function hideModel(modelName) {
             const chartId = "chart-" + modelName.replace(/\s+/g, '');
             const box = document.getElementById("box-" + chartId);
@@ -631,11 +635,11 @@ function updateCharts(grouped) {
 
             container.scrollTop += scrollSpeed * scrollDirection;
 
-            const scrollTop    = container.scrollTop;
+            const scrollTop = container.scrollTop;
             const scrollHeight = container.scrollHeight;
             const clientHeight = container.clientHeight;
 
-            const canScroll    = scrollHeight > clientHeight + 5; // ada konten untuk di-scroll
+            const canScroll = scrollHeight > clientHeight + 5;
 
             if (!canScroll) {
                 animationId = requestAnimationFrame(autoScroll);
@@ -643,7 +647,7 @@ function updateCharts(grouped) {
             }
 
             const reachedBottom = (scrollTop + clientHeight) >= (scrollHeight - 5);
-            const reachedTop    = scrollTop <= 2;
+            const reachedTop = scrollTop <= 2;
 
             if (reachedBottom && scrollDirection === 1) {
                 isAtEdge = true;
@@ -651,18 +655,18 @@ function updateCharts(grouped) {
                     scrollDirection = -1;
                     isAtEdge = false;
                     animationId = requestAnimationFrame(autoScroll);
-                }, 1000); 
+                }, 1000);
                 return;
             }
 
             if (reachedTop && scrollDirection === -1) {
                 isAtEdge = true;
-                loadData(); 
+                loadData();
                 setTimeout(() => {
                     scrollDirection = 1;
                     isAtEdge = false;
                     animationId = requestAnimationFrame(autoScroll);
-                }, 1000); 
+                }, 1000);
                 return;
             }
 
@@ -693,7 +697,7 @@ function updateCharts(grouped) {
                 stopScroll();
             }
         });
-        
+
         const valueLabelPlugin = {
             id: 'valueLabel',
             afterDatasetsDraw(chart) {
@@ -730,16 +734,17 @@ function updateCharts(grouped) {
             }
         };
 
+        // ✅ INITIAL LOAD
         loadData().then(() => {
             setTimeout(() => {
-                startScroll(); // ← mulai scroll setelah data siap
+                startScroll();
             }, 500);
         });
 
-        setInterval(function () {
-            location.reload(true);
-        }, 3600000);
-        // setInterval(loadData, 2000);
+        // ✅ AUTO UPDATE DATA SETIAP 15 DETIK (TANPA RELOAD)
+        setInterval(() => {
+            loadData();
+        }, 15000); // 15 detik, bisa diubah sesuai kebutuhan
     </script>
 
 </body>
