@@ -530,13 +530,13 @@
                                     type: "line",
                                     label: "Safety Stock",
                                     data: safety,
-                                    borderColor: "rgba(44, 8, 245, 0.4)",
+                                    borderColor: "rgb(38, 0, 255)",
                                     borderWidth: 1,
-                                    borderDash: [15, 5],
+                                    borderDash: [15, 2],
                                     pointRadius: 0, 
                                     pointHoverRadius: 0, 
                                     pointBorderWidth: 0, 
-                                    fill: false,
+                                    fill: true,
                                     tension: 0
                                 },
                                 {
