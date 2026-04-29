@@ -2,7 +2,6 @@
 <html>
 
 <head>
-
     <link rel="icon" type="image/png" href="assets/yanmar.png">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <link rel="apple-touch-icon" href="assets/yanmar.png">
@@ -315,7 +314,7 @@
             // hitung SAFE dan LOW
             Object.values(grouped).forEach(modelParts => {
                 const stocks = modelParts.map(i => parseInt(i.current_stock));
-                const safetyStocks = modelParts.map(i => Math.ceil(parseInt(i.safety_stock) * 1.2));
+                const safetyStocks = modelParts.map(i => Math.ceil(parseInt(i.safety_stock) ));
                 const minStock = Math.min(...stocks);
 
                 modelParts.forEach((item, idx) => {
@@ -476,7 +475,7 @@
 
                     if (found) {
                         const stock = parseInt(found.current_stock);
-                        const safetyStock = Number(found.safety_stock) * 1.2;
+                        const safetyStock = Number(found.safety_stock);
                         const stockValues = modelData.map(i => parseInt(i.current_stock));
                         const minStockValue = Math.min(...stockValues);
 
@@ -574,15 +573,26 @@
                                             const datasets = chart.data.datasets;
                                             return datasets
                                                 .filter(ds => ds.label)
-                                                .map((ds, i) => ({
-                                                    text: "- - - - - - - -  " + ds.label,
-                                                    fillStyle: 'transparent',
-                                                    strokeStyle: '#2c08f5',
-                                                    fontColor: '#2c08f5',
-                                                    lineWidth: 0,
-                                                    hidden: false,
-                                                    datasetIndex: i
-                                                }));
+                                                .map((ds, i) => {
+                                                    // Hitung rata-rata safety stock
+                                                    let avgValue = '';
+                                                    if (ds.data && ds.data.length > 0) {
+                                                        const avg = Math.round(
+                                                            ds.data.reduce((a, b) => a + b, 0) / ds.data.length
+                                                        );
+                                                        avgValue = ` = ${avg}`;
+                                                    }
+                                                    
+                                                    return {
+                                                        text: "- - - - - - - -  " + ds.label + avgValue,
+                                                        fillStyle: 'transparent',
+                                                        strokeStyle: '#2c08f5',
+                                                        fontColor: '#2c08f5',
+                                                        lineWidth: 0,
+                                                        hidden: false,
+                                                        datasetIndex: i
+                                                    };
+                                                });
                                         },
                                         font: { size: 12, weight: "bold" }
                                     }
@@ -713,26 +723,25 @@
 
                 chart.data.datasets.forEach((dataset, i) => {
 
-                    if (i !== 0) return;
+                    // Tampilkan nilai current stock (bar chart)
+                    if (i === 0) {
+                        const meta = chart.getDatasetMeta(i);
 
-                    const meta = chart.getDatasetMeta(i);
+                        meta.data.forEach((bar, index) => {
+                            const value = dataset.data[index];
 
-                    meta.data.forEach((bar, index) => {
+                            ctx.fillStyle = "#000";
+                            ctx.font = "bold 12px sans-serif";
+                            ctx.textAlign = "left";
+                            ctx.textBaseline = "middle";
 
-                        const value = dataset.data[index];
-
-                        ctx.fillStyle = "#000";
-                        ctx.font = "bold 12px sans-serif";
-                        ctx.textAlign = "left";
-                        ctx.textBaseline = "middle";
-
-                        ctx.fillText(
-                            value,
-                            Math.min(bar.x + 10, chart.chartArea.right - 40),
-                            bar.y
-                        );
-
-                    });
+                            ctx.fillText(
+                                value,
+                                Math.min(bar.x + 10, chart.chartArea.right - 40),
+                                bar.y
+                            );
+                        });
+                    }
 
                 });
 
