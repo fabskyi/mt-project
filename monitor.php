@@ -458,7 +458,23 @@
                 const chartId = "chart-" + modelName.replace(/\s+/g, '');
                 let modelData = grouped[modelName];
 
-                modelData.sort((a, b) => a.part_name.localeCompare(b.part_name));
+                // ✅ POIN 2: Filter model dengan safety stock 0
+                const hasSafetyStock = modelData.some(item => parseFloat(item.safety_stock) > 0);
+                if (!hasSafetyStock) {
+                    hideModel(modelName);
+                    return; // Skip model ini
+                }
+
+                // ✅ POIN 1: Sort berdasarkan location, lalu part_name
+                modelData.sort((a, b) => {
+                    const locA = parseInt(a.location) || 0;
+                    const locB = parseInt(b.location) || 0;
+                    
+                    if (locA !== locB) {
+                        return locA - locB; // Sort by location number ascending
+                    }
+                    return a.part_name.localeCompare(b.part_name); // Then by part_name
+                });
 
                 if (!modelPartOrder[modelName]) {
                     modelPartOrder[modelName] = modelData.map(i => i.part_name);
