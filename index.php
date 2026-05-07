@@ -45,7 +45,7 @@ if ($role == "monitor") {
     <link rel="apple-touch-icon" href="assets/yanmar.png">
     <meta name="theme-color" content="#ffffff">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Supermarket PT. YADIN</title>
+    <title>Supermarket (PT. YADIN)</title>
 
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
