@@ -7,7 +7,7 @@
     <link rel="apple-touch-icon" href="assets/yanmar.png">
     <meta name="theme-color" content="#ffffff">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PT. Yadin Supermarket</title>
+    <title>Supermarket (PT. Yadin)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -313,12 +313,23 @@
 
             // hitung SAFE dan LOW
             Object.values(grouped).forEach(modelParts => {
-                const stocks = modelParts.map(i => parseInt(i.current_stock));
+                const stocks = modelParts.map(i => {
+                    let stock = parseInt(i.current_stock);
+                    const partNameLower = i.part_name.toLowerCase();
+                    if (partNameLower.includes('balancer shaft') || partNameLower.includes('balancer weight')) {
+                        stock = Math.floor(stock / 2);
+                    }
+                    return stock;
+                });
                 const safetyStocks = modelParts.map(i => Math.ceil(parseInt(i.safety_stock) ));
                 const minStock = Math.min(...stocks);
 
                 modelParts.forEach((item, idx) => {
-                    const stock = parseInt(item.current_stock);
+                    let stock = parseInt(item.current_stock);
+                    const partNameLower = item.part_name.toLowerCase();
+                    if (partNameLower.includes('balancer shaft') || partNameLower.includes('balancer weight')) {
+                        stock = Math.floor(stock / 2);
+                    }
                     const safetyStock = safetyStocks[idx];
 
                     if (stock > safetyStock) safe++; // hijau → SAFE
@@ -490,9 +501,21 @@
                     const found = modelData.find(i => i.part_name === partName);
 
                     if (found) {
-                        const stock = parseInt(found.current_stock);
+                        let stock = parseInt(found.current_stock);
+                        const partNameLower = found.part_name.toLowerCase();
+                        if (partNameLower.includes('balancer shaft') || partNameLower.includes('balancer weight')) {
+                            stock = Math.floor(stock / 2);
+                        }
+                        
                         const safetyStock = Number(found.safety_stock);
-                        const stockValues = modelData.map(i => parseInt(i.current_stock));
+                        const stockValues = modelData.map(i => {
+                            let s = parseInt(i.current_stock);
+                            const pNameLower = i.part_name.toLowerCase();
+                            if (pNameLower.includes('balancer shaft') || pNameLower.includes('balancer weight')) {
+                                s = Math.floor(s / 2);
+                            }
+                            return s;
+                        });
                         const minStockValue = Math.min(...stockValues);
 
                         stocks.push(stock);
