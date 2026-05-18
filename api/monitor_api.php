@@ -8,16 +8,18 @@ try {
         SELECT
             mi.model_id,
             m.model_name,
-            i.id            AS item_id,
+            i.id               AS item_id,
             i.part_name,
             i.part_number,
-            i.current_stock,
-            i.location_id   AS location,
+            i.location_id      AS location,
             mi.safety_stock,
+            mi.allocated_stock,
+            mi.allocation_percentage,
             mi.usage_qty
         FROM model_items mi
         JOIN models m ON mi.model_id = m.id
         JOIN items  i ON mi.item_id  = i.id
+        WHERE mi.safety_stock > 0
         ORDER BY m.model_name ASC, i.location_id ASC, i.part_name ASC
     ";
 
@@ -30,16 +32,13 @@ try {
     $data = [];
 
     foreach ($rows as $row) {
-        $safety       = (int)$row['safety_stock'];
-        $currentStock = (int)$row['current_stock'];
+        $safety         = (int)$row['safety_stock'];
+        $allocatedStock = (float)$row['allocated_stock'];
 
-        // Skip part yang safety_stock-nya 0 untuk model ini
-        if ($safety <= 0) continue;
-
-        // Status: current_stock part vs safety_stock model ini
-        if ($currentStock >= $safety) {
+        // Status: allocated_stock vs safety_stock model ini
+        if ($allocatedStock >= $safety) {
             $status = "safe";
-        } elseif ($currentStock >= ($safety * 0.5)) {
+        } elseif ($allocatedStock >= ($safety * 0.5)) {
             $status = "warning";
         } else {
             $status = "low";
@@ -52,8 +51,8 @@ try {
             'part_name'     => $row['part_name'],
             'part_number'   => $row['part_number'],
             'location'      => (int)$row['location'],
-            'safety_stock'  => $safety,        // → BAR di chart
-            'current_stock' => $currentStock,  // → GARIS di chart
+            'safety_stock'  => $safety,
+            'current_stock' => $allocatedStock, // key tetap current_stock agar frontend tidak perlu diubah
             'status'        => $status,
         ];
     }

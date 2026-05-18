@@ -4,31 +4,31 @@ require_once __DIR__ . "/config.php";
 
 header("Content-Type: application/json");
 
-// ================= DEBUG (hapus setelah berhasil) =================
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-// =================================================================
-
 if (!isset($_SESSION['nik'])) {
     echo json_encode(["success" => false, "error" => "Session expired"]);
     exit;
 }
 
 $nik_karyawan = $_SESSION['nik'];
+$data         = json_decode(file_get_contents("php://input"), true);
 
-$data = json_decode(file_get_contents("php://input"), true);
-
-$mode       = strtoupper($data['mode'] ?? '');
-$scan_input = trim($data['part'] ?? '');
-$qty        = intval($data['qty'] ?? 0);
+$mode           = strtoupper($data['mode']           ?? '');
+$scan_input     = trim($data['part']                 ?? '');
+$qty            = intval($data['qty']                ?? 0);
+$model_item_id  = intval($data['model_item_id']      ?? 0); // hanya untuk OUT
 
 if ($mode === '' || $scan_input === '' || $qty <= 0) {
     echo json_encode(["success" => false, "error" => "Data tidak lengkap"]);
     exit;
 }
 
-// ====================== 1. Ambil data item + lokasi ======================
+// OUT wajib ada model_item_id
+if ($mode === 'OUT' && $model_item_id <= 0) {
+    echo json_encode(["success" => false, "error" => "Pilih model terlebih dahulu"]);
+    exit;
+}
+
+// ── 1. Ambil data item ────────────────────────────────────────────────────
 $stmt = $conn->prepare("
     SELECT id, part_name, current_stock, location_id
     FROM items
@@ -47,17 +47,47 @@ if (!$found) {
 }
 
 $current_stock = intval($current_stock ?? 0);
-$location_id   = intval($location_id ?? 1);
+$location_id   = intval($location_id   ?? 1);
+$lokasi        = ($location_id == 2) ? "MS2" : "MS1";
 
-// Mapping location_id ke teks lokasi
-$lokasi = ($location_id == 2) ? "MS2" : "MS1";
+// ── 2. Validasi model_item_id milik item ini (khusus OUT) ─────────────────
+if ($mode === 'OUT') {
+    $stmtChk = $conn->prepare("
+        SELECT mi.id, mi.allocated_stock, m.model_name
+        FROM model_items mi
+        JOIN models m ON m.id = mi.model_id
+        WHERE mi.id = ? AND mi.item_id = ?
+        LIMIT 1
+    ");
+    $stmtChk->bind_param("ii", $model_item_id, $item_id);
+    $stmtChk->execute();
+    $stmtChk->bind_result($mi_id, $allocated_stock, $model_name);
+    $miFound = $stmtChk->fetch();
+    $stmtChk->close();
 
-// ====================== 2. Hitung stock baru ======================
+    if (!$miFound) {
+        echo json_encode(["success" => false, "error" => "Model tidak valid untuk part ini"]);
+        exit;
+    }
+
+    $allocated_stock = intval($allocated_stock ?? 0);
+
+    // Cek allocated stock cukup
+    if ($allocated_stock < $qty) {
+        echo json_encode([
+            "success" => false,
+            "error"   => "Allocated stock model $model_name tidak cukup (tersedia: $allocated_stock)"
+        ]);
+        exit;
+    }
+}
+
+// ── 3. Hitung stock baru ──────────────────────────────────────────────────
 if ($mode === "IN" || $mode === "RETURN") {
     $new_stock = $current_stock + $qty;
-} else if ($mode === "OUT") {
+} elseif ($mode === "OUT") {
     if ($current_stock < $qty) {
-        echo json_encode(["success" => false, "error" => "Stock tidak cukup"]);
+        echo json_encode(["success" => false, "error" => "Stock tidak cukup (total stock: $current_stock)"]);
         exit;
     }
     $new_stock = $current_stock - $qty;
@@ -66,13 +96,7 @@ if ($mode === "IN" || $mode === "RETURN") {
     exit;
 }
 
-// ====================== 3. Update stock ======================
-$update = $conn->prepare("UPDATE items SET current_stock = ? WHERE id = ?");
-$update->bind_param("ii", $new_stock, $item_id);
-$update->execute();
-$update->close();
-
-// ====================== 4. Cek NIK ======================
+// ── 4. Cek NIK ────────────────────────────────────────────────────────────
 $cekNik = $conn->prepare("SELECT nik FROM karyawan WHERE nik = ?");
 $cekNik->bind_param("s", $nik_karyawan);
 $cekNik->execute();
@@ -81,30 +105,65 @@ $nik_exists = $cekNik->fetch();
 $cekNik->close();
 
 if (!$nik_exists) {
-    echo json_encode(["success" => false, "error" => "NIK tidak terdaftar di tabel karyawan"]);
+    echo json_encode(["success" => false, "error" => "NIK tidak terdaftar"]);
     exit;
 }
 
-// ====================== 5. Insert transaksi ======================
-$type = strtolower($mode);
+// ── 5. Transaksi DB ───────────────────────────────────────────────────────
+$conn->begin_transaction();
 
 try {
-    $insert = $conn->prepare("
-        INSERT INTO transactions (item_id, type, qty, nik, lokasi, created_at)
-        VALUES (?, ?, ?, ?, ?, NOW())
-    ");
-    $insert->bind_param("isiss", $item_id, $type, $qty, $nik_karyawan, $lokasi);
-    $insert->execute();
-    $insert->close();
+    // 5a. Update current_stock di items
+    $upItem = $conn->prepare("UPDATE items SET current_stock = ? WHERE id = ?");
+    $upItem->bind_param("ii", $new_stock, $item_id);
+    $upItem->execute();
+    $upItem->close();
+
+    // 5b. Jika OUT → kurangi allocated_stock model yang dipilih
+    if ($mode === 'OUT') {
+        $upAlloc = $conn->prepare("
+            UPDATE model_items
+            SET allocated_stock = allocated_stock - ?
+            WHERE id = ?
+        ");
+        $upAlloc->bind_param("ii", $qty, $model_item_id);
+        $upAlloc->execute();
+        $upAlloc->close();
+    }
+
+    // 5c. Insert transaksi (tambah kolom model_item_id jika ada)
+    $type = strtolower($mode);
+
+    // Cek apakah kolom model_item_id ada di tabel transactions
+    // Jika belum ada, insert tanpa kolom itu
+    $miIdForInsert = ($mode === 'OUT') ? $model_item_id : null;
+
+    if ($miIdForInsert !== null) {
+        $ins = $conn->prepare("
+            INSERT INTO transactions (item_id, type, qty, nik, lokasi, model_item_id, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, NOW())
+        ");
+        $ins->bind_param("isissi", $item_id, $type, $qty, $nik_karyawan, $lokasi, $miIdForInsert);
+    } else {
+        $ins = $conn->prepare("
+            INSERT INTO transactions (item_id, type, qty, nik, lokasi, created_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
+        ");
+        $ins->bind_param("isiss", $item_id, $type, $qty, $nik_karyawan, $lokasi);
+    }
+
+    $ins->execute();
+    $ins->close();
+
+    $conn->commit();
 
     echo json_encode([
-        "success" => true,
-        "stock_after" => $new_stock
+        "success"         => true,
+        "stock_after"     => $new_stock,
+        "allocated_after" => ($mode === 'OUT') ? ($allocated_stock - $qty) : null
     ]);
 
-} catch (mysqli_sql_exception $e) {
-    echo json_encode([
-        "success" => false,
-        "error" => "Database error: " . $e->getMessage()
-    ]);
+} catch (Exception $e) {
+    $conn->rollback();
+    echo json_encode(["success" => false, "error" => "DB error: " . $e->getMessage()]);
 }
