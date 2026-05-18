@@ -7,7 +7,7 @@
     <link rel="apple-touch-icon" href="assets/yanmar.png">
     <meta name="theme-color" content="#ffffff">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Supermarket (PT. Yadin)</title>
+    <title>PT. Yadin Supermarket</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>

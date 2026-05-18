@@ -35,6 +35,7 @@ if ($role == "monitor") {
 }
 ?>
 
+
 <!doctype html>
 <html lang="en">
 
@@ -42,12 +43,15 @@ if ($role == "monitor") {
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="assets/yanmar.png">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="sidebar.css">
     <link rel="apple-touch-icon" href="assets/yanmar.png">
     <meta name="theme-color" content="#ffffff">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Supermarket (PT. YADIN)</title>
+    <title>Supermarket PT. YADIN</title>
 
+    
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="sidebar.js"></script>
 
     <style>
         * {
@@ -961,30 +965,7 @@ if ($role == "monitor") {
 
 <body>
     <div class="layout">
-        <aside class="sidebar">
-            <div class="logo">
-                <img src="assets/yanmar.png" class="logo-img">
-                <div>
-                    <div class="logo-title">PT. YADIN</div>
-                    <div class="logo-sub">Inventory Management System</div>
-                </div>
-            </div>
-            <ul>
-                <?php if ($role == "ms1"): ?>
-                    <li class="active" onclick="setLokasi(1)">Admin MS1</li>
-                <?php endif; ?>
-
-                <?php if ($role == "ms2"): ?>
-                    <li class="active" onclick="setLokasi(2)">Admin MS2</li>
-                <?php endif; ?>
-
-                <?php if ($role == "all"): ?>
-                    <li id="btnMS1" class="active" onclick="setLokasi(1)">Admin MS1</li>
-                    <li id="btnMS2" onclick="setLokasi(2)">Admin MS2</li>
-                <?php endif; ?>
-
-            </ul>
-        </aside>
+      <?php include 'sidebar.php'; ?>
         <main class="main">
 
             <header class="topbar">
