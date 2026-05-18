@@ -1,0 +1,301 @@
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR.CSS — Shared sidebar untuk semua page PT. YADIN
+   Include di setiap page: <link rel="stylesheet" href="sidebar.css">
+══════════════════════════════════════════════════════════════ */
+
+:root {
+    --sidebar-width     : 220px;
+    --sidebar-collapsed : 0px;
+    --sidebar-bg        : #1f2d3d;
+    --sidebar-active    : #3c8dbc;
+    --sidebar-hover     : rgba(255,255,255,0.08);
+    --sidebar-border    : rgba(255,255,255,0.08);
+    --transition        : 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── LAYOUT WRAPPER ─────────────────────────────────────────── */
+.layout {
+    display    : flex;
+    min-height : 100vh;
+    transition : var(--transition);
+}
+
+/* ── SIDEBAR ────────────────────────────────────────────────── */
+.sidebar {
+    width         : var(--sidebar-width);
+    background    : var(--sidebar-bg);
+    color         : white;
+    padding       : 0;
+    flex-shrink   : 0;
+    position      : relative;
+    display       : flex;
+    flex-direction: column;
+    transition    : width var(--transition), transform var(--transition);
+    overflow      : hidden;
+    z-index       : 100;
+    box-shadow    : 4px 0 20px rgba(0,0,0,0.15);
+}
+
+.sidebar.collapsed {
+    width : var(--sidebar-collapsed);
+}
+
+/* ── TOGGLE BUTTON (inside sidebar, top-right) ──────────────── */
+.sidebar-toggle {
+    position        : absolute;
+    top             : 14px;
+    right           : 12px;
+    width           : 26px;
+    height          : 26px;
+    background      : rgba(255,255,255,0.1);
+    border          : 1px solid rgba(255,255,255,0.15);
+    border-radius   : 6px;
+    color           : rgba(255,255,255,0.7);
+    font-size       : 12px;
+    cursor          : pointer;
+    display         : flex;
+    align-items     : center;
+    justify-content : center;
+    transition      : background var(--transition), transform var(--transition);
+    z-index         : 10;
+    flex-shrink     : 0;
+}
+
+.sidebar-toggle:hover {
+    background : rgba(255,255,255,0.2);
+    color      : white;
+}
+
+/* ── SHOW BUTTON (appears when sidebar is hidden) ────────────── */
+.sidebar-show-btn {
+    display         : none;
+    position        : fixed;
+    top             : 50%;
+    left            : 0;
+    transform       : translateY(-50%);
+    width           : 22px;
+    height          : 60px;
+    background      : var(--sidebar-bg);
+    border          : none;
+    border-radius   : 0 8px 8px 0;
+    color           : rgba(255,255,255,0.8);
+    font-size       : 11px;
+    cursor          : pointer;
+    z-index         : 200;
+    box-shadow      : 3px 0 12px rgba(0,0,0,0.25);
+    transition      : background var(--transition), width var(--transition);
+    align-items     : center;
+    justify-content : center;
+}
+
+.sidebar-show-btn:hover {
+    background : var(--sidebar-active);
+    width      : 28px;
+    color      : white;
+}
+
+.sidebar.collapsed + .sidebar-show-btn,
+.sidebar-show-btn.visible {
+    display : flex;
+}
+
+/* ── SIDEBAR CONTENT WRAPPER ────────────────────────────────── */
+.sidebar-content {
+    display        : flex;
+    flex-direction : column;
+    height         : 100%;
+    padding        : 20px 0 16px;
+    overflow       : hidden;
+    min-width      : var(--sidebar-width);
+    opacity        : 1;
+    transition     : opacity var(--transition);
+}
+
+.sidebar.collapsed .sidebar-content {
+    opacity        : 0;
+    pointer-events : none;
+}
+
+/* ── LOGO ───────────────────────────────────────────────────── */
+.logo {
+    display       : flex;
+    align-items   : center;
+    gap           : 10px;
+    margin-bottom : 24px;
+    padding       : 0 20px 16px;
+    border-bottom : 1px solid var(--sidebar-border);
+    flex-shrink   : 0;
+}
+
+.logo-img {
+    height     : 30px;
+    width      : auto;
+    flex-shrink: 0;
+}
+
+.logo-text { overflow: hidden; }
+
+.logo-title {
+    font-size     : 16px;
+    font-weight   : 700;
+    letter-spacing: 0.5px;
+    color         : white;
+    position      : relative;
+    padding-left  : 10px;
+    white-space   : nowrap;
+}
+
+.logo-title::before {
+    content      : "";
+    position     : absolute;
+    left         : 0;
+    top          : 4px;
+    width        : 4px;
+    height       : 16px;
+    background   : #e11d48;
+    border-radius: 2px;
+}
+
+.logo-sub {
+    font-size  : 10px;
+    color      : rgba(255,255,255,0.5);
+    margin-top : 4px;
+    white-space: nowrap;
+}
+
+/* ── SECTION LABEL ──────────────────────────────────────────── */
+.sidebar-section-label {
+    font-size     : 10px;
+    font-weight   : 700;
+    letter-spacing: 1px;
+    color         : rgba(255,255,255,0.3);
+    padding       : 0 20px 6px;
+    margin-top    : 8px;
+    white-space   : nowrap;
+}
+
+/* ── NAV LIST ───────────────────────────────────────────────── */
+.sidebar-nav {
+    list-style : none;
+    padding    : 0 10px;
+    margin-bottom: 4px;
+}
+
+.sidebar-nav li {
+    display       : flex;
+    align-items   : center;
+    gap           : 10px;
+    padding       : 10px 12px;
+    border-radius : 8px;
+    cursor        : pointer;
+    margin-bottom : 2px;
+    transition    : background var(--transition), transform 0.15s;
+    white-space   : nowrap;
+    color         : rgba(255,255,255,0.75);
+    font-size     : 13px;
+    font-weight   : 500;
+}
+
+.sidebar-nav li:hover {
+    background : var(--sidebar-hover);
+    color      : white;
+    transform  : translateX(2px);
+}
+
+.sidebar-nav li.active {
+    background : var(--sidebar-active);
+    color      : white;
+    font-weight: 600;
+}
+
+.nav-icon {
+    font-size  : 15px;
+    flex-shrink: 0;
+    width      : 20px;
+    text-align : center;
+}
+
+.nav-label {
+    overflow     : hidden;
+    text-overflow: ellipsis;
+    white-space  : nowrap;
+}
+
+/* ── BOTTOM SECTION ─────────────────────────────────────────── */
+.sidebar-bottom {
+    margin-top     : auto;
+    padding        : 12px 10px 0;
+    border-top     : 1px solid var(--sidebar-border);
+    flex-shrink    : 0;
+}
+
+.sidebar-user {
+    display      : flex;
+    align-items  : center;
+    gap          : 10px;
+    padding      : 8px 12px;
+    color        : rgba(255,255,255,0.5);
+    font-size    : 12px;
+    white-space  : nowrap;
+    overflow     : hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-sidebar-logout {
+    display       : flex;
+    align-items   : center;
+    gap           : 10px;
+    width         : 100%;
+    padding       : 10px 12px;
+    background    : transparent;
+    border        : none;
+    border-radius : 8px;
+    color         : rgba(255,100,100,0.8);
+    font-size     : 13px;
+    font-weight   : 500;
+    cursor        : pointer;
+    transition    : background var(--transition), color var(--transition);
+    white-space   : nowrap;
+    text-align    : left;
+}
+
+.btn-sidebar-logout:hover {
+    background : rgba(220,38,38,0.2);
+    color      : #fc8181;
+}
+
+/* ── MAIN CONTENT ADJUSTMENT ────────────────────────────────── */
+.main {
+    flex       : 1;
+    padding    : 25px;
+    overflow   : hidden;
+    transition : var(--transition);
+    min-width  : 0;
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .sidebar {
+        position  : fixed;
+        top       : 0;
+        left      : 0;
+        height    : 100vh;
+        z-index   : 1000;
+        transform : translateX(0);
+    }
+
+    .sidebar.collapsed {
+        width     : var(--sidebar-width);
+        transform : translateX(calc(-1 * var(--sidebar-width)));
+    }
+
+    .sidebar.collapsed .sidebar-content {
+        opacity        : 1;
+        pointer-events : all;
+    }
+
+    .sidebar-show-btn {
+        top  : 16px;
+        transform: none;
+    }
+}
