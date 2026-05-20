@@ -76,7 +76,14 @@
                 <span class="nav-icon">👤</span>
                 <span class="nav-label"><?= htmlspecialchars($_SESSION['user_id'] ?? 'User') ?></span>
             </div>
-            <button class="btn-sidebar-logout" onclick="if(confirm('Yakin ingin logout?')) window.location.href='signout.php'">
+
+           <button class="btn-sidebar-logout"
+                onclick="if(confirm('Home Page?')) window.location.href='home_menu.php'">
+                <span class="nav-icon">🏚️</span>
+                <span class="nav-label">Home</span>
+            </button>
+             
+            <button class="btn-sidebar-logout" onclick="if(confirm('logout?')) window.location.href='signout.php'">
                 <span class="nav-icon">🚪</span>
                 <span class="nav-label">Logout</span>
             </button>
