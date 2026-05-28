@@ -120,16 +120,16 @@ try {
     $upItem->close();
 
     // 5b. Jika OUT → kurangi allocated_stock model yang dipilih
-    if ($mode === 'OUT') {
-        $upAlloc = $conn->prepare("
-            UPDATE model_items
-            SET allocated_stock = allocated_stock - ?
-            WHERE id = ?
-        ");
-        $upAlloc->bind_param("ii", $qty, $model_item_id);
-        $upAlloc->execute();
-        $upAlloc->close();
-    }
+    // if ($mode === 'OUT') {
+    //     $upAlloc = $conn->prepare("
+    //         UPDATE model_items
+    //         SET allocated_stock = allocated_stock - ?
+    //         WHERE id = ?
+    //     ");
+    //     $upAlloc->bind_param("ii", $qty, $model_item_id);
+    //     $upAlloc->execute();
+    //     $upAlloc->close();
+    // }
 
     // 5c. Insert transaksi (tambah kolom model_item_id jika ada)
     $type = strtolower($mode);
