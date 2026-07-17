@@ -1,5 +1,5 @@
 <?php
-
+$currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!-- ══════════════════════════════════════════════
@@ -67,6 +67,11 @@
                 onclick="window.location.href='history.php?lokasi=<?= $lokasi ?>'">
                 <span class="nav-icon">📋</span>
                 <span class="nav-label">History</span>
+            </li>
+            <li class="<?= $currentPage == 'model_master.php' ? 'active' : '' ?>"
+                onclick="window.location.href='model_master.php?lokasi=<?= $lokasi ?>'">
+                <span class="nav-icon">🧩</span>
+                <span class="nav-label">Model &amp; Routing</span>
             </li>
         </ul>
 
