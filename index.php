@@ -70,33 +70,6 @@ if ($role == "monitor") {
             min-height: 100vh;
         }
 
-        .sidebar {
-            width: 220px;
-            background: #1f2d3d;
-            color: white;
-            padding: 20px;
-        }
-
-        .logo {
-            margin-bottom: 30px;
-        }
-
-        .sidebar ul {
-            list-style: none;
-        }
-
-        .sidebar li {
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-
-        .sidebar li.active,
-        .sidebar li:hover {
-            background: #3c8dbc;
-        }
-
         .main {
             flex: 1;
             padding: 25px;
@@ -978,9 +951,9 @@ if ($role == "monitor") {
 
                     <select id="sortStockSelect">
                         <option value="">All Status</option>
-                        <option value="lower">🔴 Lower</option>
-                        <option value="ok">🟢 OK</option>
-                        <option value="over">🟠 Over</option>
+                        <option value="lower">Lower</option>
+                        <option value="ok">OK</option>
+                        <option value="over">Over</option>
                     </select>
 
                     <input type="text" id="searchInput" placeholder="Search model / part / barcode...">
@@ -1064,8 +1037,9 @@ if ($role == "monitor") {
             border-radius:12px;
             box-shadow:0 4px 12px rgba(220,38,38,0.15);
         ">
-                    <h3 style="margin-bottom:15px; color:#dc2626;">
-                        ⚠ LOW STOCK ALERT
+                    <h3 style="margin-bottom:15px; color:#dc2626; display:flex; align-items:center; gap:6px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/></svg>
+                        LOW STOCK ALERT
                     </h3>
 
                     <table id="lowStockTable" style="width:100%; border-collapse:collapse; font-size:13px;">

@@ -26,11 +26,11 @@ if ($check->get_result()->num_rows > 0) {
 }
 $check->close();
 
-$stmt = $conn->prepare("INSERT INTO models (model_name) VALUES (?)");
-$stmt->bind_param("s", $model_name);
-
-if ($stmt->execute()) {
+try {
+    $stmt = $conn->prepare("INSERT INTO models (model_name) VALUES (?)");
+    $stmt->bind_param("s", $model_name);
+    $stmt->execute();
     echo json_encode(["success" => true, "id" => $conn->insert_id, "model_name" => $model_name]);
-} else {
-    echo json_encode(["success" => false, "message" => $stmt->error]);
+} catch (\mysqli_sql_exception $e) {
+    echo json_encode(["success" => false, "message" => "Gagal menyimpan model: " . $e->getMessage()]);
 }

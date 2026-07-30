@@ -184,22 +184,13 @@ $current_date = date('l, d F Y');
 
                     $menus = [
                         [
-                            'label'  => 'Buat Akun Baru',
-                            'desc'   => 'Tambahkan pengguna sistem',
+                            'label'  => 'Tambah User',
+                            'desc'   => 'Data karyawan + akun login sekaligus',
                             'icon'   => 'user-plus',
-                            'href'   => 'create_account.php',
+                            'href'   => 'user_setting.php',
                             'active' => $isAdmin,
                             'stagger'=> 1,
                             'color'  => 'violet',
-                        ],
-                        [
-                            'label'  => 'Tambah Karyawan',
-                            'desc'   => 'Kelola data karyawan',
-                            'icon'   => 'users',
-                            'href'   => 'add_karyawan.php',
-                            'active' => $isAdmin,
-                            'stagger'=> 2,
-                            'color'  => 'indigo',
                         ],
                         [
                             'label'  => 'Monitoring Display',
@@ -207,7 +198,7 @@ $current_date = date('l, d F Y');
                             'icon'   => 'device-desktop-analytics',
                             'href'   => 'monitor.php',
                             'active' => true,
-                            'stagger'=> 3,
+                            'stagger'=> 2,
                             'color'  => 'teal',
                         ],
                         [
@@ -216,7 +207,7 @@ $current_date = date('l, d F Y');
                             'icon'   => 'layout-dashboard',
                             'href'   => 'index.php?lokasi=1',
                             'active' => ($isAdmin || $isMs1),
-                            'stagger'=> 4,
+                            'stagger'=> 3,
                             'color'  => 'blue',
                         ],
                         [
@@ -225,7 +216,7 @@ $current_date = date('l, d F Y');
                             'icon'   => 'layout-dashboard',
                             'href'   => 'index.php?lokasi=2',
                             'active' => ($isAdmin || $isMs2),
-                            'stagger'=> 5,
+                            'stagger'=> 4,
                             'color'  => 'cyan',
                         ],
                         [
@@ -234,7 +225,7 @@ $current_date = date('l, d F Y');
                             'icon'   => 'receipt',
                             'href'   => $isMs1 ? 'transaction.php?lokasi=1' : ($isMs2 ? 'transaction.php?lokasi=2' : 'transaction.php'),
                             'active' => ($isAdmin || $isMs1 || $isMs2),
-                            'stagger'=> 6,
+                            'stagger'=> 5,
                             'color'  => 'amber',
                         ],
                     ];

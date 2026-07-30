@@ -41,17 +41,6 @@ if ($role == "monitor") {
         body { background:#f4f6f9; }
         .layout { display:flex; min-height:100vh; }
 
-        /* SIDEBAR */
-        .sidebar { width:220px; background:#1f2d3d; color:white; padding:20px; flex-shrink:0; }
-        .logo { display:flex; align-items:center; gap:10px; margin-bottom:35px; padding-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); }
-        .logo-img { height:30px; width:auto; }
-        .logo-title { font-size:19px; font-weight:bold; letter-spacing:1px; color:white; position:relative; padding-left:5px; }
-        .logo-title::before { content:""; position:absolute; left:0; top:5px; width:4px; height:18px; background:#e11d48; border-radius:2px; }
-        .logo-sub { font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; }
-        .sidebar ul { list-style:none; }
-        .sidebar li { padding:12px; border-radius:8px; cursor:pointer; margin-bottom:10px; }
-        .sidebar li.active, .sidebar li:hover { background:#3c8dbc; }
-
         /* MAIN */
         .main { flex:1; padding:25px; overflow:hidden; }
         .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
@@ -120,7 +109,7 @@ if ($role == "monitor") {
         /* Safety Stock badge */
         .ss-badge { background:#f0fdf4; color:#15803d; padding:3px 9px; border-radius:20px; font-size:12px; font-weight:600; display:inline-block; position:relative; }
         .ss-badge.auto { background:linear-gradient(135deg,#fef3c7,#fef08a); color:#854d0e; border:1px solid #fcd34d; }
-        .ss-badge.auto::before { content:"⚡"; position:absolute; top:-4px; right:-4px; font-size:10px; }
+        .ss-badge.auto::before { content:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='10' height='10' fill='none' stroke='%23854d0e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11'/%3E%3C/svg%3E"); position:absolute; top:-4px; right:-4px; }
         .ss-zero { background:#f1f5f9; color:#94a3b8; padding:3px 9px; border-radius:20px; font-size:11px; display:inline-block; }
         .ss-pct-badge { background:#fdf4ff; color:#7e22ce; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:600; display:inline-block; cursor:default; }
         .ss-pct-badge[title] { border-bottom:1px dashed #a855f7; }
@@ -189,7 +178,7 @@ if ($role == "monitor") {
         @keyframes scaleIn { from{transform:scale(.8);opacity:0} to{transform:scale(1);opacity:1} }
 
         /* SNACKBAR */
-        #snackbar { visibility:hidden; min-width:250px; background:#1f2d3d; color:white; text-align:center; border-radius:8px; padding:12px 20px; position:fixed; z-index:9999; bottom:30px; left:50%; transform:translateX(-50%); font-size:13px; font-weight:600; }
+        #snackbar { visibility:hidden; min-width:250px; background:#1f2d3d; color:white; border-radius:8px; padding:12px 20px; position:fixed; z-index:9999; bottom:30px; left:50%; transform:translateX(-50%); font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; justify-content:center; }
         #snackbar.show { visibility:visible; animation:fadeInUp .3s ease, fadeOut .5s ease 2.5s forwards; }
         @keyframes fadeInUp { from{opacity:0;transform:translateX(-50%) translateY(20px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
         @keyframes fadeOut  { to{opacity:0} }
@@ -209,7 +198,7 @@ if ($role == "monitor") {
         .mp-modal-header h3 { font-size:17px; font-weight:700; color:#1f2d3d; display:flex; align-items:center; gap:8px; }
         .mp-modal-body { padding:20px 24px; overflow-y:auto; flex:1; }
         .mp-modal-footer { padding:14px 24px; border-top:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; background:#fafbfd; flex-shrink:0; }
-        .modal-close { font-size:22px; cursor:pointer; color:#94a3b8; line-height:1; }
+        .modal-close { font-size:22px; cursor:pointer; color:#94a3b8; line-height:1; display:inline-flex; }
         .modal-close:hover { color:#334155; }
 
         /* Model selector */
@@ -355,33 +344,33 @@ if ($role == "monitor") {
                 </select>
                 <input type="text" id="searchInput" placeholder="Search...">
                 <button class="btn-auto-ss" id="btnAutoSS" onclick="confirmAutoSS()" title="Hitung otomatis allocation% dari rasio monthly plan tiap model">
-                    📅 Auto dari Monthly Plan
+                    <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3l0 4"/><path d="M8 3l0 4"/><path d="M4 11l16 0"/></svg> Auto dari Monthly Plan
                 </button>
                 <button class="btn-mp-manager" onclick="openMpModal()" title="Atur Monthly Plan per Model">
-                    📋 Monthly Plan
+                    <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/><path d="M9 12l.01 0"/><path d="M13 12l2 0"/><path d="M9 16l.01 0"/><path d="M13 16l2 0"/></svg> Monthly Plan
                 </button>
                 <button class="btn-transfer" onclick="openTransferModal()" title="Transfer allocated stock antar model (urgent)">
-                    🔀 Transfer Stock
+                    <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M18 4l3 3l-3 3"/><path d="M18 20l3 -3l-3 -3"/><path d="M3 7h3a5 5 0 0 1 5 5a5 5 0 0 0 5 5h5"/><path d="M21 7h-5a4.978 4.978 0 0 0 -3 1m-4 8a4.984 4.984 0 0 1 -3 1h-3"/></svg> Transfer Stock
                 </button>
                 <button class="btn-save-all" onclick="confirmSaveAll()">
-                    💾 Save All
+                    <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"/><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M9 4l0 4l6 0l0 -4"/></svg> Save All
                     <span class="pending-count" id="pendingCount">0</span>
                 </button>
                 <button id="btnRefresh" class="btn-refresh" onclick="manualRefresh()">
-                    <i class="icon">⟳</i> Refresh
+                    <i class="icon"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.05 11a8 8 0 1 1 .5 4m-.5 5v-5h5"/></svg></i> Refresh
                 </button>
-                <button class="btn-nav" onclick="goBack()">← Back</button>
+                <button class="btn-nav" onclick="goBack()"><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M15 6l-6 6l6 6"/></svg> Back</button>
                 <button class="btn-logout" onclick="logout()">Logout</button>
             </div>
         </header>
 
         <!-- WORKING DAYS / MONTH SETTING BOX -->
         <div class="working-days-box">
-            <label>🗓️ Working Days(Month):</label>
+            <label><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3l0 4"/><path d="M8 3l0 4"/><path d="M4 11l16 0"/></svg> Working Days(Month):</label>
             <input type="number" id="workingDaysMonth" min="1" max="31" value="22" oninput="onDaysMonthChange()">
             <span class="hint" id="daysHint">Default: 22 hari</span>
             <button class="btn-save-days" id="btnSaveDays" onclick="saveWorkingDaysMonth()" disabled>
-                💾 Simpan & Recalculate
+                <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"/><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M9 4l0 4l6 0l0 -4"/></svg> Simpan & Recalculate
             </button>
             <span class="formula-hint" title="Safety Stock = (Monthly Plan ÷ Days/Month) × Days/Week">
                 Input sesuai hari kerja
@@ -405,7 +394,7 @@ if ($role == "monitor") {
                     <input type="number" id="bulkPct" placeholder="%" min="0" max="100" step="0.01">
                     <button class="btn-bulk" onclick="applyBulk()">Set ke Model Terfilter</button>
                 </div>
-                <span class="ss-legend">📅 Monthly Plan = dasar perhitungan alokasi otomatis</span>
+                <span class="ss-legend"><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3l0 4"/><path d="M8 3l0 4"/><path d="M4 11l16 0"/></svg> Monthly Plan = dasar perhitungan alokasi otomatis</span>
             </div>
             <div class="toolbar-right">
                 <span class="page-info" id="pageInfo">-</span>
@@ -455,7 +444,7 @@ if ($role == "monitor") {
         <p id="toastMessage">Simpan semua perubahan alokasi?</p>
         <div class="toast-sub" id="toastSub"></div>
         <div class="toast-actions">
-            <button id="toastYesBtn" class="btn-yes">✔ Yes, Save</button>
+            <button id="toastYesBtn" class="btn-yes">Yes, Save</button>
             <button onclick="closeToast()" class="btn-no">Cancel</button>
         </div>
     </div>
@@ -467,21 +456,21 @@ if ($role == "monitor") {
 <div id="mpModal" class="modal-overlay">
     <div class="mp-modal-box">
         <div class="mp-modal-header">
-            <h3>📋 Monthly Plan Manager
+            <h3><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/><path d="M9 12l.01 0"/><path d="M13 12l2 0"/><path d="M9 16l.01 0"/><path d="M13 16l2 0"/></svg> Monthly Plan Manager
                 <span class="mp-changed-count" id="mpChangedCount">0</span>
             </h3>
             <div style="display:flex;gap:10px;align-items:center;">
                 <input type="file" id="mpExcelFile" accept=".xlsx,.xls" style="display:none" onchange="handleExcelImport(this)">
                 <button class="btn-import-excel" onclick="document.getElementById('mpExcelFile').click()" title="Import dari Excel (MODEL, Qty)">
-                    📊 Import Excel
+                    <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/><path d="M3 15h7"/><path d="M8 12l3 3l-3 3"/></svg> Import Excel
                 </button>
-                <span class="modal-close" onclick="closeMpModal()">×</span>
+                <span class="modal-close" onclick="closeMpModal()"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></span>
             </div>
         </div>
         <div class="mp-modal-body">
 
             <div class="import-info" id="importInfo">
-                <strong>📊 Format Excel:</strong> Kolom 1 = MODEL, Kolom 2 = Qty
+                <strong><svg width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z"/><path d="M3 15h7"/><path d="M8 12l3 3l-3 3"/></svg> Format Excel:</strong> Kolom 1 = MODEL, Kolom 2 = Qty
             </div>
 
             <div class="mp-model-select">
@@ -499,13 +488,13 @@ if ($role == "monitor") {
             </div>
 
             <div class="mp-bulk-row">
-                <label>⚡ Set semua model yang terlihat ke:</label>
+                <label><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"/></svg> Set semua model yang terlihat ke:</label>
                 <input type="number" id="mpBulkVal" placeholder="qty" min="0">
                 <button class="btn-mp-bulk" onclick="applyMpBulk()">Apply</button>
                 <button class="btn-mp-reset" onclick="resetMpAll()">Reset ke 0</button>
             </div>
 
-            <input type="text" class="mp-search" id="mpSearch" placeholder="🔍 Cari model atau part..." oninput="renderMpList()">
+            <input type="text" class="mp-search" id="mpSearch" placeholder="Cari model atau part..." oninput="renderMpList()">
 
             <div class="mp-part-list" id="mpPartList">
                 <div class="mp-empty">Memuat data...</div>
@@ -516,7 +505,7 @@ if ($role == "monitor") {
             <div style="display:flex;gap:10px">
                 <button class="btn-cancel-modal" onclick="closeMpModal()">Batal</button>
                 <button class="btn-mp-save" id="btnMpSave" onclick="saveMpChanges()" disabled>
-                    💾 Simpan Monthly Plan
+                    <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"/><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M9 4l0 4l6 0l0 -4"/></svg> Simpan Monthly Plan
                 </button>
             </div>
         </div>
@@ -529,13 +518,13 @@ if ($role == "monitor") {
 <div id="transferModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header">
-            <h3>🔀 Transfer Allocated Stock</h3>
-            <span class="modal-close" onclick="closeTransferModal()">×</span>
+            <h3><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M18 4l3 3l-3 3"/><path d="M18 20l3 -3l-3 -3"/><path d="M3 7h3a5 5 0 0 1 5 5a5 5 0 0 0 5 5h5"/><path d="M21 7h-5a4.978 4.978 0 0 0 -3 1m-4 8a4.984 4.984 0 0 1 -3 1h-3"/></svg> Transfer Allocated Stock</h3>
+            <span class="modal-close" onclick="closeTransferModal()"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></span>
         </div>
         <div class="modal-body">
 
             <div class="urgent-badge">
-                ⚡ Gunakan fitur ini saat ada model yang dikerjakan secara urgent dan butuh tambahan stock segera.
+                <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;flex-shrink:0"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"/></svg> Gunakan fitur ini saat ada model yang dikerjakan secara urgent dan butuh tambahan stock segera.
             </div>
 
             <div class="part-selector">
@@ -547,7 +536,7 @@ if ($role == "monitor") {
 
             <div class="transfer-flow">
                 <div class="transfer-side from">
-                    <label>📤 Ambil dari Model</label>
+                    <label><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M17 9l-5 -5l-5 5"/><path d="M12 4l0 12"/></svg> Ambil dari Model</label>
                     <select id="trFromModel" onchange="onTrModelChange()">
                         <option value="">— Pilih Model —</option>
                     </select>
@@ -557,10 +546,10 @@ if ($role == "monitor") {
                     </div>
                 </div>
 
-                <div class="transfer-arrow">➜</div>
+                <div class="transfer-arrow"><svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l14 0"/><path d="M15 16l4 -4"/><path d="M15 8l4 4"/></svg></div>
 
                 <div class="transfer-side to">
-                    <label>📥 Berikan ke Model (Urgent)</label>
+                    <label><svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 11l5 5l5 -5"/><path d="M12 4l0 12"/></svg> Berikan ke Model (Urgent)</label>
                     <select id="trToModel" onchange="onTrModelChange()">
                         <option value="">— Pilih Model —</option>
                     </select>
@@ -589,11 +578,11 @@ if ($role == "monitor") {
                     <span class="preview-val" id="pvPart">—</span>
                 </div>
                 <div class="preview-row">
-                    <span class="preview-label">📤 <span id="pvFromName">—</span> sesudah transfer</span>
+                    <span class="preview-label"><svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M17 9l-5 -5l-5 5"/><path d="M12 4l0 12"/></svg> <span id="pvFromName">—</span> sesudah transfer</span>
                     <span class="preview-val red" id="pvFromAfter">—</span>
                 </div>
                 <div class="preview-row">
-                    <span class="preview-label">📥 <span id="pvToName">—</span> sesudah transfer</span>
+                    <span class="preview-label"><svg width="11" height="11" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 11l5 5l5 -5"/><path d="M12 4l0 12"/></svg> <span id="pvToName">—</span> sesudah transfer</span>
                     <span class="preview-val green" id="pvToAfter">—</span>
                 </div>
                 <div class="preview-row">
@@ -605,7 +594,7 @@ if ($role == "monitor") {
         <div class="modal-footer">
             <button class="btn-cancel-modal" onclick="closeTransferModal()">Batal</button>
             <button class="btn-do-transfer" id="btnDoTransfer" onclick="doTransfer()" disabled>
-                🔀 Lakukan Transfer
+                <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M18 4l3 3l-3 3"/><path d="M18 20l3 -3l-3 -3"/><path d="M3 7h3a5 5 0 0 1 5 5a5 5 0 0 0 5 5h5"/><path d="M21 7h-5a4.978 4.978 0 0 0 -3 1m-4 8a4.984 4.984 0 0 1 -3 1h-3"/></svg> Lakukan Transfer
             </button>
         </div>
     </div>
@@ -614,6 +603,13 @@ if ($role == "monitor") {
 <div id="snackbar"></div>
 
 <script>
+    // Ikon vector hitam-putih (line icon, currentColor) untuk update label tombol via JS
+    const ICON = {
+        calendar: '<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"/><path d="M16 3l0 4"/><path d="M8 3l0 4"/><path d="M4 11l16 0"/></svg>',
+        save:     '<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2"/><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M9 4l0 4l6 0l0 -4"/></svg>',
+        shuffle:  '<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M18 4l3 3l-3 3"/><path d="M18 20l3 -3l-3 -3"/><path d="M3 7h3a5 5 0 0 1 5 5a5 5 0 0 0 5 5h5"/><path d="M21 7h-5a4.978 4.978 0 0 0 -3 1m-4 8a4.984 4.984 0 0 1 -3 1h-3"/></svg>',
+    };
+
     let currentLokasi     = <?php echo $lokasi; ?>;
     let allData           = [];
     let filteredData      = [];
@@ -685,22 +681,22 @@ if ($role == "monitor") {
         })
         .then(r => r.json())
         .then(res => {
-            btn.textContent = "💾 Simpan & Recalculate";
+            btn.innerHTML = ICON.save + " Simpan & Recalculate";
             if (res.success) {
-                showSnackbar(`✔ Working days diupdate! ${res.recalculated} part recalculated.`);
+                showSnackbar(`Working days diupdate! ${res.recalculated} part recalculated.`);
                 originalDaysMonth = val;
                 workingDaysMonth  = val;
                 document.getElementById("daysHint").textContent = `Tersimpan: ${val} hari`;
                 loadData();
             } else {
                 btn.disabled = false;
-                showSnackbar("❌ " + (res.message || "Gagal menyimpan"));
+                showSnackbar(res.message || "Gagal menyimpan", "error");
             }
         })
         .catch(() => {
             btn.disabled = false;
-            btn.textContent = "💾 Simpan & Recalculate";
-            showSnackbar("❌ Connection error");
+            btn.innerHTML = ICON.save + " Simpan & Recalculate";
+            showSnackbar("Connection error", "error");
         });
     }
 
@@ -1055,11 +1051,11 @@ if ($role == "monitor") {
         const part = document.getElementById("bulkPart").value;
         const pct  = parseFloat(document.getElementById("bulkPct").value);
 
-        if (!part)                         { showSnackbar("⚠ Pilih Part terlebih dahulu"); return; }
-        if (isNaN(pct) || pct < 0 || pct > 100) { showSnackbar("⚠ Masukkan % antara 0–100"); return; }
+        if (!part)                         { showSnackbar("Pilih Part terlebih dahulu", "error"); return; }
+        if (isNaN(pct) || pct < 0 || pct > 100) { showSnackbar("Masukkan % antara 0–100", "error"); return; }
 
         const targets = filteredData.filter(d => d.part_name === part);
-        if (!targets.length) { showSnackbar("⚠ Tidak ada data yang cocok di filter saat ini"); return; }
+        if (!targets.length) { showSnackbar("Tidak ada data yang cocok di filter saat ini", "error"); return; }
 
         targets.forEach(d => {
             const ex = getExistingPending(d.model_item_id);
@@ -1073,7 +1069,7 @@ if ($role == "monitor") {
         renderPage();
         updateCards();
         updatePendingUI();
-        showSnackbar(`✔ ${targets.length} row diset ke ${pct}%`);
+        showSnackbar(`${targets.length} row diset ke ${pct}%`);
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -1085,10 +1081,10 @@ if ($role == "monitor") {
         const partsNoMP   = new Set(allData.filter(d => parseInt(d.total_monthly_plan) === 0).map(d => d.item_id));
 
         toastMode = 'autoSS';
-        document.getElementById("toastMessage").textContent = "📅 Hitung otomatis alokasi dari Monthly Plan?";
+        document.getElementById("toastMessage").textContent = "Hitung otomatis alokasi dari Monthly Plan?";
         document.getElementById("toastSub").textContent =
             `${partsWithMP.size} part akan dihitung ulang (${partsNoMP.size} part tanpa Monthly Plan akan di-skip).`;
-        document.getElementById("toastYesBtn").textContent = "📅 Ya, Hitung Otomatis";
+        document.getElementById("toastYesBtn").textContent = "Ya, Hitung Otomatis";
         document.getElementById("toastYesBtn").className   = "btn-yes purple";
         document.getElementById("toastYesBtn").onclick     = doAutoSS;
         document.getElementById("toastConfirm").style.display = "flex";
@@ -1108,19 +1104,19 @@ if ($role == "monitor") {
         .then(r => r.json())
         .then(res => {
             btn.disabled = false;
-            btn.innerHTML = "📅 Auto dari Monthly Plan";
+            btn.innerHTML = ICON.calendar + " Auto dari Monthly Plan";
             if (res.success) {
-                showSnackbar(`✔ ${res.message}`);
+                showSnackbar(`${res.message}`);
                 pendingChanges = {};
                 resetFiltersAndLoad();
             } else {
-                showSnackbar("❌ " + (res.message || "Gagal menghitung"));
+                showSnackbar(res.message || "Gagal menghitung", "error");
             }
         })
         .catch(() => {
             btn.disabled = false;
-            btn.innerHTML = "📅 Auto dari Monthly Plan";
-            showSnackbar("❌ Connection error");
+            btn.innerHTML = ICON.calendar + " Auto dari Monthly Plan";
+            showSnackbar("Connection error", "error");
         });
     }
 
@@ -1132,12 +1128,12 @@ if ($role == "monitor") {
         if (!Object.keys(pendingChanges).length) { showSnackbar("No changes to save."); return; }
 
         const overItems = new Set(allData.filter(d => calcTotalPct(d.item_id) > 100.001).map(d => d.item_id));
-        if (overItems.size) { showSnackbar(`❌ ${overItems.size} part melebihi 100% — perbaiki dulu`); return; }
+        if (overItems.size) { showSnackbar(`${overItems.size} part melebihi 100% — perbaiki dulu`, "error"); return; }
 
         toastMode = 'save';
         document.getElementById("toastMessage").textContent = "Simpan semua perubahan alokasi?";
         document.getElementById("toastSub").textContent     = `${Object.keys(pendingChanges).length} baris akan diperbarui.`;
-        document.getElementById("toastYesBtn").textContent  = "✔ Yes, Save";
+        document.getElementById("toastYesBtn").textContent  = "Yes, Save";
         document.getElementById("toastYesBtn").className    = "btn-yes";
         document.getElementById("toastYesBtn").onclick      = doSaveAll;
         document.getElementById("toastConfirm").style.display = "flex";
@@ -1160,14 +1156,14 @@ if ($role == "monitor") {
         .then(r => r.json())
         .then(res => {
             if (res.success) {
-                showSnackbar(`✔ Saved! ${res.recalculated} part recalculated.`);
+                showSnackbar(`Saved! ${res.recalculated} part recalculated.`);
                 pendingChanges = {};
                 resetFiltersAndLoad();
             } else {
-                showSnackbar("❌ " + (res.message || "Save failed"));
+                showSnackbar(res.message || "Save failed", "error");
             }
         })
-        .catch(() => showSnackbar("❌ Connection error"));
+        .catch(() => showSnackbar("Connection error", "error"));
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -1220,9 +1216,14 @@ if ($role == "monitor") {
         updatePendingUI();
     }
 
-    function showSnackbar(msg) {
+    const ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M5 12l5 5l10 -10"/></svg>';
+    const ICON_ALERT = '<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/></svg>';
+
+    function showSnackbar(msg, type) {
         const sb = document.getElementById("snackbar");
-        sb.textContent = msg; sb.className = "show";
+        const icon = type === "error" ? ICON_ALERT : ICON_CHECK;
+        sb.innerHTML = icon + '<span>' + msg.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])) + '</span>';
+        sb.className = "show";
         setTimeout(() => sb.className = "", 3200);
     }
 
@@ -1258,7 +1259,7 @@ if ($role == "monitor") {
         if (!file) return;
 
         document.getElementById("importInfo").classList.add("show");
-        showSnackbar("📊 Membaca file Excel...");
+        showSnackbar("Membaca file Excel...");
 
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -1307,15 +1308,15 @@ if ($role == "monitor") {
 
                 // Show summary
                 if (imported > 0) {
-                    showSnackbar(`✔ ${imported} baris diimpor dari Excel (${notFound} model tidak ditemukan)`);
+                    showSnackbar(`${imported} baris diimpor dari Excel (${notFound} model tidak ditemukan)`);
                     console.log("Imported:", importedModels.join(", "));
                 } else {
-                    showSnackbar("⚠ Tidak ada data yang cocok dari Excel");
+                    showSnackbar("Tidak ada data yang cocok dari Excel", "error");
                 }
 
             } catch (err) {
                 console.error("Excel import error:", err);
-                showSnackbar("❌ Gagal membaca file Excel");
+                showSnackbar("Gagal membaca file Excel", "error");
             }
 
             // Reset file input
@@ -1472,7 +1473,7 @@ if ($role == "monitor") {
 
     function applyMpBulk() {
         const val = parseInt(document.getElementById("mpBulkVal").value);
-        if (isNaN(val) || val < 0) { showSnackbar("⚠ Masukkan angka yang valid"); return; }
+        if (isNaN(val) || val < 0) { showSnackbar("Masukkan angka yang valid", "error"); return; }
 
         document.querySelectorAll(".mp-modal-input").forEach(input => {
             const orig = parseInt(input.dataset.original) || 0;
@@ -1490,7 +1491,7 @@ if ($role == "monitor") {
 
         renderMpList();
         updateMpChangedBadge();
-        showSnackbar(`✔ ${Object.keys(mpChanges).length} baris diset ke ${val}`);
+        showSnackbar(`${Object.keys(mpChanges).length} baris diset ke ${val}`);
     }
 
     function resetMpAll() {
@@ -1546,20 +1547,20 @@ if ($role == "monitor") {
         .then(r => r.json())
         .then(res => {
             btn.disabled = false;
-            btn.textContent = "💾 Simpan Monthly Plan";
+            btn.innerHTML = ICON.save + " Simpan Monthly Plan";
             if (res.success) {
-                showSnackbar(`✔ Monthly Plan tersimpan! ${res.updated} baris diperbarui.`);
+                showSnackbar(`Monthly Plan tersimpan! ${res.updated} baris diperbarui.`);
                 mpChanges = {};
                 closeMpModal();
                 loadData();
             } else {
-                showSnackbar("❌ " + (res.message || "Gagal menyimpan"));
+                showSnackbar(res.message || "Gagal menyimpan", "error");
             }
         })
         .catch(() => {
             btn.disabled = false;
-            btn.textContent = "💾 Simpan Monthly Plan";
-            showSnackbar("❌ Connection error");
+            btn.innerHTML = ICON.save + " Simpan Monthly Plan";
+            showSnackbar("Connection error", "error");
         });
     }
 
@@ -1729,19 +1730,19 @@ if ($role == "monitor") {
         .then(r => r.json())
         .then(res => {
             btn.disabled = false;
-            btn.textContent = "🔀 Lakukan Transfer";
+            btn.innerHTML = ICON.shuffle + " Lakukan Transfer";
             if (res.success) {
-                showSnackbar(`✔ Transfer berhasil! ${qty} unit dipindah.`);
+                showSnackbar(`Transfer berhasil! ${qty} unit dipindah.`);
                 closeTransferModal();
                 loadData();
             } else {
-                showSnackbar("❌ " + (res.message || "Transfer gagal"));
+                showSnackbar(res.message || "Transfer gagal", "error");
             }
         })
         .catch(() => {
             btn.disabled = false;
-            btn.textContent = "🔀 Lakukan Transfer";
-            showSnackbar("❌ Connection error");
+            btn.innerHTML = ICON.shuffle + " Lakukan Transfer";
+            showSnackbar("Connection error", "error");
         });
     }
 </script>

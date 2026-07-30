@@ -21,13 +21,18 @@
 }
 
 /* ── SIDEBAR ────────────────────────────────────────────────── */
+/* position:fixed supaya sidebar tetap diam di layar (tidak ikut
+   scroll) walaupun konten halaman di sebelah kanan sangat panjang */
 .sidebar {
     width         : var(--sidebar-width);
     background    : var(--sidebar-bg);
     color         : white;
     padding       : 0;
     flex-shrink   : 0;
-    position      : relative;
+    position      : fixed;
+    top           : 0;
+    left          : 0;
+    height        : 100vh;
     display       : flex;
     flex-direction: column;
     transition    : width var(--transition), transform var(--transition);
@@ -209,10 +214,21 @@
 }
 
 .nav-icon {
-    font-size  : 15px;
     flex-shrink: 0;
     width      : 20px;
-    text-align : center;
+    display    : inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-icon svg {
+    width : 16px;
+    height: 16px;
+    stroke: #ffffff;
+    fill  : none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .nav-label {
@@ -265,21 +281,26 @@
 }
 
 /* ── MAIN CONTENT ADJUSTMENT ────────────────────────────────── */
+/* margin-left menggantikan ruang sidebar yang sekarang fixed
+   (dikeluarkan dari flex flow), supaya konten tidak ketutupan */
 .main {
     flex       : 1;
     padding    : 25px;
     overflow   : hidden;
     transition : var(--transition);
     min-width  : 0;
+    margin-left: var(--sidebar-width);
+}
+
+.sidebar.collapsed ~ .main {
+    margin-left: var(--sidebar-collapsed);
 }
 
 /* ── RESPONSIVE ─────────────────────────────────────────────── */
+/* Di layar sempit sidebar overlay DI ATAS konten (bukan mendorongnya),
+   jadi .main tidak perlu margin-left sama sekali di sini */
 @media (max-width: 768px) {
     .sidebar {
-        position  : fixed;
-        top       : 0;
-        left      : 0;
-        height    : 100vh;
         z-index   : 1000;
         transform : translateX(0);
     }
@@ -297,5 +318,10 @@
     .sidebar-show-btn {
         top  : 16px;
         transform: none;
+    }
+
+    .main,
+    .sidebar.collapsed ~ .main {
+        margin-left: 0;
     }
 }

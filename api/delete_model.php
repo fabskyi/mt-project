@@ -28,11 +28,11 @@ if ($count > 0) {
     exit;
 }
 
-$stmt = $conn->prepare("DELETE FROM models WHERE id = ?");
-$stmt->bind_param("i", $id);
-
-if ($stmt->execute()) {
+try {
+    $stmt = $conn->prepare("DELETE FROM models WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
     echo json_encode(["success" => true, "deleted" => $stmt->affected_rows]);
-} else {
-    echo json_encode(["success" => false, "message" => $stmt->error]);
+} catch (\mysqli_sql_exception $e) {
+    echo json_encode(["success" => false, "message" => "Gagal menghapus model: " . $e->getMessage()]);
 }

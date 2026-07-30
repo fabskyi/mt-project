@@ -1666,6 +1666,33 @@ INSERT INTO `production_plan` (`id`, `lokasi_id`, `plan_qty`, `plan_date`, `crea
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `role_hierarchy`
+-- Sumber tunggal pemetaan role flat (users.role) ke struktur parent-child
+-- Superadmin/Admin/User/Monitor untuk UI User Setting
+--
+
+CREATE TABLE `role_hierarchy` (
+  `role` varchar(20) NOT NULL,
+  `parent_group` varchar(20) NOT NULL,
+  `parent_label` varchar(30) NOT NULL,
+  `child_label` varchar(30) DEFAULT NULL,
+  `sort_order` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `role_hierarchy`
+--
+
+INSERT INTO `role_hierarchy` (`role`, `parent_group`, `parent_label`, `child_label`, `sort_order`) VALUES
+('all', 'superadmin', 'Superadmin', NULL, 1),
+('ms1', 'admin', 'Admin', 'MS1', 2),
+('ms2', 'admin', 'Admin', 'MS2', 3),
+('operator', 'user', 'User', 'Operator', 4),
+('machining', 'user', 'User', 'Machining', 5);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `stock_logs`
 --
 
@@ -4686,7 +4713,7 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `nik` varchar(20) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('machining','operator','monitor','ms1','ms2','all') NOT NULL,
+  `role` varchar(20) NOT NULL COMMENT 'FK ke role_hierarchy.role',
   `nama` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -4768,6 +4795,12 @@ ALTER TABLE `production_plan`
   ADD UNIQUE KEY `unique_plan` (`lokasi_id`,`plan_date`);
 
 --
+-- Indexes for table `role_hierarchy`
+--
+ALTER TABLE `role_hierarchy`
+  ADD PRIMARY KEY (`role`);
+
+--
 -- Indexes for table `stock_logs`
 --
 ALTER TABLE `stock_logs`
@@ -4790,7 +4823,8 @@ ALTER TABLE `transactions`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nik` (`nik`);
+  ADD UNIQUE KEY `nik` (`nik`),
+  ADD KEY `fk_users_role` (`role`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -4873,6 +4907,12 @@ ALTER TABLE `stock_logs`
 ALTER TABLE `transactions`
   ADD CONSTRAINT `transactions_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `transactions_ibfk_2` FOREIGN KEY (`nik`) REFERENCES `karyawan` (`nik`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `fk_users_role` FOREIGN KEY (`role`) REFERENCES `role_hierarchy` (`role`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

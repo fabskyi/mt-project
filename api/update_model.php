@@ -27,11 +27,11 @@ if ($check->get_result()->num_rows > 0) {
 }
 $check->close();
 
-$stmt = $conn->prepare("UPDATE models SET model_name = ? WHERE id = ?");
-$stmt->bind_param("si", $model_name, $id);
-
-if ($stmt->execute()) {
+try {
+    $stmt = $conn->prepare("UPDATE models SET model_name = ? WHERE id = ?");
+    $stmt->bind_param("si", $model_name, $id);
+    $stmt->execute();
     echo json_encode(["success" => true, "updated" => $stmt->affected_rows]);
-} else {
-    echo json_encode(["success" => false, "message" => $stmt->error]);
+} catch (\mysqli_sql_exception $e) {
+    echo json_encode(["success" => false, "message" => "Gagal menyimpan model: " . $e->getMessage()]);
 }

@@ -178,7 +178,8 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
         .scan-guide::before { content:''; position:absolute; inset:-2px; background:rgba(0,217,126,0.3); filter:blur(4px); animation:guidePulse 2s ease-in-out infinite; }
         @keyframes guidePulse { 0%,100%{opacity:.5} 50%{opacity:1} }
         @keyframes scanAnim { 0%{top:4px;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{top:calc(100% - 4px);opacity:0} }
-        .cam-statusbar { padding:11px 20px; background:#0a0a0a; border-top:1px solid #1c1c1c; font-size:12px; font-weight:600; text-align:center; min-height:40px; display:flex; align-items:center; justify-content:center; color:#555; letter-spacing:.3px; transition:color .25s; flex-shrink:0; }
+        .cam-statusbar { padding:11px 20px; background:#0a0a0a; border-top:1px solid #1c1c1c; font-size:12px; font-weight:600; text-align:center; min-height:40px; display:flex; align-items:center; justify-content:center; gap:7px; color:#555; letter-spacing:.3px; transition:color .25s; flex-shrink:0; }
+        .cam-statusbar svg { stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; width:15px; height:15px; flex-shrink:0; }
         .cam-statusbar.ok      { color:#00d97e; }
         .cam-statusbar.error   { color:#f87171; }
         .cam-statusbar.warning { color:#fbbf24; }
@@ -227,7 +228,8 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
         .model-alloc-badge.has-stock { background:#f0fdf4; }
         .model-alloc-badge.no-stock  .alloc-num { color:#d1d5db; }
 
-        .model-empty { text-align:center; padding:32px; color:#9ca3af; font-size:13px; }
+        .model-empty { text-align:center; padding:32px; color:#9ca3af; font-size:13px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+        .model-empty svg { stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; width:24px; height:24px; }
     </style>
 </head>
 <body>
@@ -262,7 +264,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
         </div>
     </div>
 
-    <button class="btn-primary" onclick="openCamera()">📷 &nbsp;Scan Barcode</button>
+    <button class="btn-primary" onclick="openCamera()"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg> &nbsp;Scan Barcode</button>
 
     <input class="input-field" type="text" id="scanInput"
         placeholder="Scan / Ketik Manual"
@@ -270,7 +272,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
 
     <!-- Part Info -->
     <div class="part-info-card" id="partInfoCard">
-        <div class="pi-header">📦 &nbsp;Informasi Part</div>
+        <div class="pi-header"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"/><path d="M12 12l8 -4.5"/><path d="M12 12l0 9"/><path d="M12 12l-8 -4.5"/></svg> &nbsp;Informasi Part</div>
         <div class="pi-body">
             <div class="pi-item full">
                 <span class="pi-label">Part Name</span>
@@ -294,7 +296,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
     <!-- Selected Model Bar (muncul setelah pilih model saat OUT) -->
     <div class="selected-model-bar" id="selectedModelBar">
         <span id="selectedModelText">—</span>
-        <span style="color:#059669;font-size:16px;">✓</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" stroke="#059669" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5l10 -10"/></svg>
     </div>
 
     <input class="input-field" type="number" id="qtyInput"
@@ -312,29 +314,29 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
 
     <button class="btn-primary green" id="submitTxBtn"
         style="display:none;" onclick="submitTransaction()">
-        ✅ &nbsp;Submit Transaksi
+        <svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M5 12l5 5l10 -10"/></svg> &nbsp;Submit Transaksi
     </button>
 
     <!-- History -->
     <div class="card">
-        <h3>📋 Last Transactions</h3>
+        <h3><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z"/><path d="M9 12l.01 0"/><path d="M13 12l2 0"/><path d="M9 16l.01 0"/><path d="M13 16l2 0"/></svg> Last Transactions</h3>
         <div id="historyBox" class="history-box"></div>
     </div>
 
     <!-- Download -->
     <?php if ($isMachining || $isAdmin): ?>
     <div class="card">
-        <h3 style="margin-bottom:16px;">📥 Download History</h3>
+        <h3 style="margin-bottom:16px;"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 11l5 5l5 -5"/><path d="M12 4l0 12"/></svg> Download History</h3>
         <div class="dl-grid">
             <div class="dl-box">
                 <div class="dl-label">Harian</div>
                 <input class="input-field" type="date" id="dlDate" style="margin-bottom:0;padding:11px;">
-                <button class="btn-primary" style="margin-bottom:0;" onclick="downloadHistory()">📥 CSV</button>
+                <button class="btn-primary" style="margin-bottom:0;" onclick="downloadHistory()"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 11l5 5l5 -5"/><path d="M12 4l0 12"/></svg> CSV</button>
             </div>
             <div class="dl-box">
                 <div class="dl-label">Bulanan</div>
                 <input class="input-field" type="month" id="dlMonth" style="margin-bottom:0;padding:11px;">
-                <button class="btn-primary" style="margin-bottom:0;" onclick="downloadHistoryMonthly()">📥 CSV</button>
+                <button class="btn-primary" style="margin-bottom:0;" onclick="downloadHistoryMonthly()"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"/><path d="M7 11l5 5l5 -5"/><path d="M12 4l0 12"/></svg> CSV</button>
             </div>
         </div>
     </div>
@@ -350,7 +352,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
         <div class="popup-handle"></div>
         <div class="popup-hdr">
             <div class="popup-hdr-left">
-                <div class="popup-icon black">📷</div>
+                <div class="popup-icon black"><svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg></div>
                 <div>
                     <div class="popup-title">Barcode Scanner</div>
                     <div class="popup-subtitle">Arahkan kamera ke barcode</div>
@@ -361,7 +363,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
                     <div class="cam-dot"></div>
                     <span class="cam-live-txt">LIVE</span>
                 </div>
-                <button class="popup-close-btn" onclick="closeCamera()">✕</button>
+                <button class="popup-close-btn" onclick="closeCamera()"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
             </div>
         </div>
         <div class="cam-viewport">
@@ -376,7 +378,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
         </div>
         <div class="cam-statusbar" id="camStatus">Menginisialisasi kamera...</div>
         <div class="popup-ftr">
-            <button class="pop-btn ghost" onclick="closeCamera()">✕ &nbsp;Tutup Kamera</button>
+            <button class="pop-btn ghost" onclick="closeCamera()"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg> &nbsp;Tutup Kamera</button>
         </div>
     </div>
 </div>
@@ -388,17 +390,17 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
     <div class="popup-box">
         <div class="popup-hdr">
             <div class="popup-hdr-left">
-                <div class="popup-icon black">🔧</div>
+                <div class="popup-icon black"><svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h3v-3l-3.5 -3.5a6 6 0 0 1 8 8l6 6a2 2 0 0 1 -3 3l-6 -6a6 6 0 0 1 -8 -8l3.5 3.5"/></svg></div>
                 <div>
                     <div class="popup-title">Pilih Model</div>
                     <div class="popup-subtitle" id="modelModalSub">Pilih model yang menggunakan part ini</div>
                 </div>
             </div>
-            <button class="popup-close-btn" onclick="closeModelModal()">✕</button>
+            <button class="popup-close-btn" onclick="closeModelModal()"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
         </div>
         <div class="popup-body">
             <input type="text" class="model-search-input" id="modelSearchInput"
-                placeholder="🔍 Cari model..." oninput="filterModelList()">
+                placeholder="Cari model..." oninput="filterModelList()">
             <div class="model-list" id="modelList">
                 <div class="model-empty">Memuat data...</div>
             </div>
@@ -420,20 +422,20 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
     <div class="popup-box">
         <div class="popup-hdr">
             <div class="popup-hdr-left">
-                <div class="popup-icon amber">⚠️</div>
+                <div class="popup-icon amber"><svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/></svg></div>
                 <div>
                     <div class="popup-title">Konfirmasi Transaksi</div>
                     <div class="popup-subtitle">Pastikan data sudah benar</div>
                 </div>
             </div>
-            <button class="popup-close-btn" onclick="closeConfirm()">✕</button>
+            <button class="popup-close-btn" onclick="closeConfirm()"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg></button>
         </div>
         <div class="popup-body">
             <div class="confirm-card" id="confirmDetail"></div>
         </div>
         <div class="popup-ftr">
             <button class="pop-btn ghost" onclick="closeConfirm()">Batal</button>
-            <button class="pop-btn black" onclick="doTransaction()">✓ &nbsp;Ya, Lanjutkan</button>
+            <button class="pop-btn black" onclick="doTransaction()"><svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M5 12l5 5l10 -10"/></svg> &nbsp;Ya, Lanjutkan</button>
         </div>
     </div>
 </div>
@@ -450,6 +452,14 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
     let scanLocked        = false;
     let isTransitioning   = false;
     const SCAN_COOL       = 1500;
+
+    // Ikon vector hitam-putih (line icon, currentColor)
+    const ICON = {
+        camera: '<svg viewBox="0 0 24 24"><path d="M5 7h1a2 2 0 0 0 2 -2a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1a2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9a2 2 0 0 1 2 -2"/><path d="M9 13a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg>',
+        check:  '<svg viewBox="0 0 24 24"><path d="M5 12l5 5l10 -10"/></svg>',
+        alert:  '<svg viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/></svg>',
+        x:      '<svg viewBox="0 0 24 24"><path d="M18 6l-12 12"/><path d="M6 6l12 12"/></svg>',
+    };
 
     /* ── AUDIO / VIBRATE ── */
     let audioCtx = null;
@@ -482,9 +492,11 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
 
     /* ── CAM STATUS ── */
     const camStatusEl = document.getElementById("camStatus");
-    function setCamStatus(type, msg) {
+    function setCamStatus(type, msg, icon) {
         camStatusEl.className = "cam-statusbar " + type;
-        camStatusEl.textContent = msg;
+        const ic = icon || (type === "error" ? ICON.alert : type === "warning" ? ICON.alert : type === "ok" ? ICON.check : ICON.camera);
+        camStatusEl.innerHTML = ic + '<span></span>';
+        camStatusEl.lastElementChild.textContent = msg;
     }
 
     /* ── INIT ── */
@@ -538,12 +550,12 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
 
         startCam({ facingMode:"environment" }, config)
             .catch(() => {
-                setCamStatus("warning", "⚠ Mencoba kamera lain...");
+                setCamStatus("warning", "Mencoba kamera lain...");
                 return new Promise(r => setTimeout(r,300)).then(() => startCam(true, config));
             })
             .catch(() => new Promise(r => setTimeout(r,300)).then(() => startCam(undefined, config)))
             .catch(err => {
-                setCamStatus("error", "❌ " + (err.message ?? err));
+                setCamStatus("error", String(err.message ?? err));
                 isTransitioning = false;
                 setTimeout(() => closePopup("cameraModal"), 2000);
             });
@@ -551,7 +563,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
 
     function startCam(cam, config) {
         return html5QrCode.start(cam ?? { facingMode:"environment" }, config, onScanSuccess)
-            .then(() => { scannerReady=true; isTransitioning=false; setCamStatus("", "📷 Arahkan ke barcode..."); })
+            .then(() => { scannerReady=true; isTransitioning=false; setCamStatus("", "Arahkan ke barcode..."); })
             .catch(err => { isTransitioning=false; throw err; });
     }
 
@@ -559,7 +571,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
         if (scanLocked || isTransitioning) return;
         scanLocked = true;
         beep(1800,80); vibrate(60);
-        setCamStatus("ok", "✅ " + txt);
+        setCamStatus("ok", txt);
         scanInput.value = txt;
         setTimeout(() => stopCamera(() => processBarcode(txt)), 100);
         setTimeout(() => { scanLocked = false; }, SCAN_COOL);
@@ -591,7 +603,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
         })
         .then(r => r.json())
         .then(res => {
-            if (!res.success) { alert("❌ " + res.error); return; }
+            if (!res.success) { alert(res.error); return; }
             selectedItem = res;
             showPartInfo(res);
 
@@ -603,7 +615,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
                 showQtyInput();
             }
         })
-        .catch(() => alert("❌ Koneksi gagal, coba lagi."));
+        .catch(() => alert("Koneksi gagal, coba lagi."));
     }
 
     scanInput.addEventListener("keydown", function(e) {
@@ -646,7 +658,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
             .then(res => {
                 if (!res.success) {
                     document.getElementById("modelList").innerHTML =
-                        '<div class="model-empty">❌ Gagal memuat model</div>';
+                        '<div class="model-empty">' + ICON.alert + ' Gagal memuat model</div>';
                     return;
                 }
                 allModelOptions = res.models;
@@ -654,7 +666,7 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
             })
             .catch(() => {
                 document.getElementById("modelList").innerHTML =
-                    '<div class="model-empty">❌ Koneksi gagal</div>';
+                    '<div class="model-empty">' + ICON.alert + ' Koneksi gagal</div>';
             });
     }
 
@@ -815,12 +827,12 @@ $nama     = $dataUser['nama'] ?? 'Unknown';
                     const allocMsg = (res.allocated_after !== null && res.allocated_after !== undefined)
                         ? `\nAlloc ${selectedModelItem?.model_name}: ${res.allocated_after}`
                         : "";
-                    alert("✅ Transaction Success" + allocMsg);
+                    alert("Transaction Success" + allocMsg);
                     resetForm();
                     loadHistory();
                 } else {
                     beep(400,200,0.4);
-                    alert("❌ " + res.error);
+                    alert(res.error);
                 }
             } catch(e) {
                 alert("Server Error.");

@@ -24,14 +24,17 @@ if ($check->get_result()->num_rows > 0) {
 }
 $check->close();
 
-$stmt = $conn->prepare("
-    INSERT INTO model_items (model_id, item_id, usage_qty)
-    VALUES (?, ?, ?)
-");
-$stmt->bind_param("iii", $model_id, $item_id, $usage_qty);
-
-if ($stmt->execute()) {
+try {
+    $stmt = $conn->prepare("
+        INSERT INTO model_items (model_id, item_id, usage_qty)
+        VALUES (?, ?, ?)
+    ");
+    $stmt->bind_param("iii", $model_id, $item_id, $usage_qty);
+    $stmt->execute();
     echo json_encode(["success" => true, "model_item_id" => $conn->insert_id]);
-} else {
-    echo json_encode(["success" => false, "message" => $stmt->error]);
+} catch (\mysqli_sql_exception $e) {
+    $msg = str_contains($e->getMessage(), 'foreign key constraint')
+        ? "Model atau part ini sudah tidak ada (mungkin baru saja dihapus). Muat ulang halaman."
+        : "Gagal menyimpan routing: " . $e->getMessage();
+    echo json_encode(["success" => false, "message" => $msg]);
 }
